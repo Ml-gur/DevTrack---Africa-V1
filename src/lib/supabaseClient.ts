@@ -1,14 +1,13 @@
+/// <reference types="vite/client" />
+
 import { createClient } from '@supabase/supabase-js'
 
 // Get environment variables with fallbacks
 const getSupabaseConfig = () => {
-  // Safe access to import.meta.env
-  const env = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {}
-
-  // Use local development credentials if available, otherwise fall back to environment variables
-  const supabaseUrl = env.VITE_SUPABASE_URL || 'http://127.0.0.1:54321'
-  const anonKey = env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH'
-  const projectId = env.VITE_SUPABASE_PROJECT_ID || 'local-dev'
+  // Use environment variables if available, otherwise fall back to cloud Supabase
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bxytbgpqpltujtoabmxa.supabase.co'
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4eXRiZ3BxcGx0dWp0b2FibXhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzODQ5OTQsImV4cCI6MjA3Nzk2MDk5NH0.n2rxSXvWO5ksSe68WCAbBnWhZ63Rfy_P8AAKskWcXNA'
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'bxytbgpqpltujtoabmxa'
 
   return {
     url: supabaseUrl,
