@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTrack Africa - Branding Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    .header h1 {
+      font-size: 48px;
+      color: #1F2937;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      font-size: 18px;
+      color: #718096;
+    }
+    
+    .section {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .section h2 {
+      font-size: 32px;
+      color: #1F2937;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-subtitle {
+      color: #718096;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    
+    .logo-display {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+    
+    .logo-item {
+      text-align: center;
+    }
+    
+    .logo-item img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 15px;
+    }
+    
+    .logo-label {
+      font-size: 14px;
+      color: #718096;
+      font-weight: 600;
+    }
+    
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+    
+    .icon-item {
+      text-align: center;
+    }
+    
+    .icon-preview {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 15px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);
+    }
+    
+    .icon-label {
+      font-size: 14px;
+      color: #718096;
+      font-weight: 600;
+    }
+    
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .color-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .color-preview {
+      height: 100px;
+      width: 100%;
+    }
+    
+    .color-info {
+      padding: 15px;
+      background: #f7fafc;
+    }
+    
+    .color-name {
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 5px;
+    }
+    
+    .color-hex {
+      font-family: 'Courier New', monospace;
+      color: #718096;
+      font-size: 14px;
+    }
+    
+    .gradient-preview {
+      height: 150px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+    
+    .usage-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .usage-card {
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .usage-card h3 {
+      color: #1F2937;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .usage-list {
+      list-style: none;
+    }
+    
+    .usage-list li {
+      padding: 8px 0;
+      color: #4a5568;
+      padding-left: 25px;
+      position: relative;
+    }
+    
+    .usage-list.good li::before {
+      content: "✅";
+      position: absolute;
+      left: 0;
+    }
+    
+    .usage-list.bad li::before {
+      content: "❌";
+      position: absolute;
+      left: 0;
+    }
+    
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 32px;
+      }
+      
+      .section h2 {
+        font-size: 24px;
+      }
+      
+      .usage-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 DevTrack Africa</h1>
+      <p>Professional Branding System - Preview</p>
+    </div>
+
+    <!-- Logo Section -->
+    <div class="section">
+      <h2>📐 Logo & Favicon</h2>
+      <p class="section-subtitle">Primary brand marks for all applications</p>
+      
+      <div class="logo-display">
+        <div class="logo-item">
+          <img src="logo.svg" alt="DevTrack Africa Logo" style="max-width: 300px;">
+          <div class="logo-label">Full Logo (200×60) - Navigation & Headers</div>
+        </div>
+        
+        <div class="logo-item">
+          <img src="favicon.svg" alt="DevTrack Africa Favicon" style="max-width: 128px;">
+          <div class="logo-label">Favicon (64×64) - Browser Tabs & Bookmarks</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PWA Icons Section -->
+    <div class="section">
+      <h2>📱 PWA Icons<span class="badge">Africa-Themed</span></h2>
+      <p class="section-subtitle">Generated icons for Progressive Web App installation</p>
+      
+      <div style="background: #ebf8ff; border: 2px solid #bee3f8; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+        <p style="color: #2c5282; margin-bottom: 10px;"><strong>🎯 How to Generate:</strong></p>
+        <ol style="margin-left: 20px; color: #2d3748; line-height: 1.8;">
+          <li>Open <code>generate-pwa-icons.html</code> in your browser</li>
+          <li>Click "Download All Icons" button</li>
+          <li>Move 5 PNG files to <code>/public</code> folder</li>
+        </ol>
+      </div>
+      
+      <div class="icon-grid">
+        <div class="icon-item">
+          <div class="icon-preview" style="width: 32px; height: 32px; border-radius: 4px;">
+            <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M35 12C35 12 38 14 39 16C40 18 41 20 42 22C43 24 43 26 44 28C45 30 46 32 46 34C46 36 46 38 45 40C44 42 43 44 42 46C41 48 39 49 37 50C35 51 33 51 31 52C29 52 27 52 25 51C23 50 21 49 20 47C19 45 18 43 18 41C18 39 18 37 19 35C20 33 21 31 22 29C23 27 24 25 25 23C26 21 27 19 28 17C29 15 30 13 32 12C33 11.5 34 11.5 35 12Z" fill="white" opacity="0.95"/>
+            </svg>
+          </div>
+          <div class="icon-label">16×16<br>Browser Tab</div>
+        </div>
+        
+        <div class="icon-item">
+          <div class="icon-preview" style="width: 64px; height: 64px; border-radius: 8px;">
+            <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M35 12C35 12 38 14 39 16C40 18 41 20 42 22C43 24 43 26 44 28C45 30 46 32 46 34C46 36 46 38 45 40C44 42 43 44 42 46C41 48 39 49 37 50C35 51 33 51 31 52C29 52 27 52 25 51C23 50 21 49 20 47C19 45 18 43 18 41C18 39 18 37 19 35C20 33 21 31 22 29C23 27 24 25 25 23C26 21 27 19 28 17C29 15 30 13 32 12C33 11.5 34 11.5 35 12Z" fill="white" opacity="0.95"/>
+            </svg>
+          </div>
+          <div class="icon-label">32×32<br>Favicon</div>
+        </div>
+        
+        <div class="icon-item">
+          <div class="icon-preview" style="width: 100px; height: 100px; border-radius: 15px;">
+            <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M35 12C35 12 38 14 39 16C40 18 41 20 42 22C43 24 43 26 44 28C45 30 46 32 46 34C46 36 46 38 45 40C44 42 43 44 42 46C41 48 39 49 37 50C35 51 33 51 31 52C29 52 27 52 25 51C23 50 21 49 20 47C19 45 18 43 18 41C18 39 18 37 19 35C20 33 21 31 22 29C23 27 24 25 25 23C26 21 27 19 28 17C29 15 30 13 32 12C33 11.5 34 11.5 35 12Z" fill="white" opacity="0.95"/>
+            </svg>
+          </div>
+          <div class="icon-label">180×180<br>iOS Home Screen</div>
+        </div>
+        
+        <div class="icon-item">
+          <div class="icon-preview" style="width: 100px; height: 100px; border-radius: 15px;">
+            <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M35 12C35 12 38 14 39 16C40 18 41 20 42 22C43 24 43 26 44 28C45 30 46 32 46 34C46 36 46 38 45 40C44 42 43 44 42 46C41 48 39 49 37 50C35 51 33 51 31 52C29 52 27 52 25 51C23 50 21 49 20 47C19 45 18 43 18 41C18 39 18 37 19 35C20 33 21 31 22 29C23 27 24 25 25 23C26 21 27 19 28 17C29 15 30 13 32 12C33 11.5 34 11.5 35 12Z" fill="white" opacity="0.95"/>
+            </svg>
+          </div>
+          <div class="icon-label">192×192<br>Android Home Screen</div>
+        </div>
+        
+        <div class="icon-item">
+          <div class="icon-preview" style="width: 100px; height: 100px; border-radius: 15px;">
+            <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M35 12C35 12 38 14 39 16C40 18 41 20 42 22C43 24 43 26 44 28C45 30 46 32 46 34C46 36 46 38 45 40C44 42 43 44 42 46C41 48 39 49 37 50C35 51 33 51 31 52C29 52 27 52 25 51C23 50 21 49 20 47C19 45 18 43 18 41C18 39 18 37 19 35C20 33 21 31 22 29C23 27 24 25 25 23C26 21 27 19 28 17C29 15 30 13 32 12C33 11.5 34 11.5 35 12Z" fill="white" opacity="0.95"/>
+            </svg>
+          </div>
+          <div class="icon-label">512×512<br>Splash Screen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color System -->
+    <div class="section">
+      <h2>🎨 Color System</h2>
+      <p class="section-subtitle">Official DevTrack Africa color palette</p>
+      
+      <div class="gradient-preview">
+        DevTrack Africa Gradient
+      </div>
+      
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-preview" style="background: #8B5CF6;"></div>
+          <div class="color-info">
+            <div class="color-name">Primary Purple</div>
+            <div class="color-hex">#8B5CF6</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-preview" style="background: #6366F1;"></div>
+          <div class="color-info">
+            <div class="color-name">Secondary Purple</div>
+            <div class="color-hex">#6366F1</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-preview" style="background: #E0E7FF;"></div>
+          <div class="color-info">
+            <div class="color-name">Light Purple</div>
+            <div class="color-hex">#E0E7FF</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-preview" style="background: #1F2937;"></div>
+          <div class="color-info">
+            <div class="color-name">Dark Gray (Text)</div>
+            <div class="color-hex">#1F2937</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Guidelines -->
+    <div class="section">
+      <h2>📋 Usage Guidelines</h2>
+      <p class="section-subtitle">How to use DevTrack Africa branding</p>
+      
+      <div class="usage-grid">
+        <div class="usage-card">
+          <h3>✅ Do This</h3>
+          <ul class="usage-list good">
+            <li>Use logo on navigation bars</li>
+            <li>Maintain aspect ratio when resizing</li>
+            <li>Use on white or light backgrounds</li>
+            <li>Keep minimum width of 100px</li>
+            <li>Use exact color hex codes</li>
+            <li>Generate icons from provided tool</li>
+          </ul>
+        </div>
+        
+        <div class="usage-card">
+          <h3>❌ Don't Do This</h3>
+          <ul class="usage-list bad">
+            <li>Don't change logo colors</li>
+            <li>Don't separate icon from text</li>
+            <li>Don't distort or stretch logo</li>
+            <li>Don't use on dark backgrounds</li>
+            <li>Don't create custom icon versions</li>
+            <li>Don't use wrong color shades</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Design Elements -->
+    <div class="section">
+      <h2>🌍 Design Elements</h2>
+      <p class="section-subtitle">Visual components that make up DevTrack Africa identity</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+        <div style="background: #f7fafc; padding: 30px; border-radius: 12px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 10px;">🌍</div>
+          <h3 style="color: #1F2937; margin-bottom: 10px;">Africa Silhouette</h3>
+          <p style="color: #718096; font-size: 14px;">Represents our pan-African mission and target audience</p>
+        </div>
+        
+        <div style="background: #f7fafc; padding: 30px; border-radius: 12px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 10px;">< ></div>
+          <h3 style="color: #1F2937; margin-bottom: 10px;">Code Brackets</h3>
+          <p style="color: #718096; font-size: 14px;">Symbolizes software development and technical excellence</p>
+        </div>
+        
+        <div style="background: #f7fafc; padding: 30px; border-radius: 12px; text-align: center;">
+          <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%); border-radius: 50%; margin: 0 auto 10px;"></div>
+          <h3 style="color: #1F2937; margin-bottom: 10px;">Purple Gradient</h3>
+          <p style="color: #718096; font-size: 14px;">Modern, tech-forward color scheme that stands out</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 60px; padding: 40px; color: #718096;">
+      <p style="font-size: 18px; margin-bottom: 10px;">🚀 DevTrack Africa</p>
+      <p style="font-size: 14px;">Professional Branding System</p>
+      <p style="font-size: 12px; margin-top: 20px;">Created: November 6, 2025 | Status: Production Ready</p>
+    </div>
+  </div>
+</body>
+</html>

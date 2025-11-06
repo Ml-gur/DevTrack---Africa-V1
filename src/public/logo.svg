@@ -1,0 +1,25 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon/Logo Mark -->
+  <circle cx="30" cy="30" r="26" fill="url(#logoGradient)"/>
+  
+  <!-- Africa continent silhouette -->
+  <path d="M32 12C32 12 34 14 35 16C36 18 37 19 37.5 21C38 23 38.5 25 39 27C39.5 29 40 31 40 33C40 35 39.5 37 39 39C38.5 41 37.5 42 36 43.5C34.5 45 33 45.5 31 46C29 46.5 27 46.5 25.5 45.5C24 44.5 23 43 22.5 41C22 39 22 37 22.5 35C23 33 24 31 25 29C26 27 27 25 28 23C29 21 30 19 31 17C31.5 15.5 32 13.5 32 12Z" fill="white" opacity="0.95"/>
+  
+  <!-- Code symbol -->
+  <path d="M24 24L21 30L24 36M36 24L39 30L36 36" stroke="#E0E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="30" cy="30" r="1.5" fill="#E0E7FF"/>
+  
+  <!-- Text "DevTrack" -->
+  <text x="65" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#1F2937">DevTrack</text>
+  
+  <!-- Text "AFRICA" -->
+  <text x="65" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#8B5CF6" letter-spacing="1.5">AFRICA</text>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+</svg>
