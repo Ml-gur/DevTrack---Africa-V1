@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
@@ -138,6 +138,9 @@ export default defineConfig({
       '@jsr/supabase__supabase-js@2': '@jsr/supabase__supabase-js',
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  optimizeDeps: {
+    include: ['recharts']
   },
   build: {
     target: 'esnext',
