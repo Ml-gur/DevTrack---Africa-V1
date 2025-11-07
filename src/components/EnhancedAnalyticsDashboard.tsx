@@ -173,7 +173,7 @@ export default function EnhancedAnalyticsDashboard({
   const dateRange = useMemo(() => {
     const now = new Date();
     let start: Date;
-    
+
     switch (timeFilter) {
       case 'today':
         start = startOfDay(now);
@@ -196,7 +196,7 @@ export default function EnhancedAnalyticsDashboard({
       default:
         start = startOfMonth(now);
     }
-    
+
     return { start, end: now };
   }, [timeFilter]);
 

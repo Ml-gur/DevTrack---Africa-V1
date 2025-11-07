@@ -35,6 +35,7 @@ export interface Task {
   timerStartTime?: string
   dependencies: string[]
   assignedTo?: string
+  completedAt?: string
   created_at: string
   updated_at: string
 }
