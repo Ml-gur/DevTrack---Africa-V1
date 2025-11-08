@@ -25,6 +25,66 @@
     <body>
       <div id="root"></div>
       <script type="module" src="/src/main.tsx"></script>
+      
+      <!-- Global PWA Install Handler -->
+      <script>
+        // Global handler for PWA install prompt
+        // This works with any button that has id="installButton"
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+          // Prevent the default mini-infobar from appearing
+          e.preventDefault();
+          // Store the event so it can be triggered later
+          deferredPrompt = e;
+          
+          // Show the install button if it exists
+          const installBtn = document.getElementById('installButton');
+          if (installBtn) {
+            installBtn.style.display = 'block';
+            installBtn.disabled = false;
+          }
+          
+          console.log('📱 PWA install prompt available');
+        });
+        
+        // Handle install button clicks
+        document.addEventListener('click', (e) => {
+          if (e.target && e.target.id === 'installButton') {
+            if (!deferredPrompt) {
+              console.log('⚠️ Install prompt not available');
+              return;
+            }
+            
+            // Hide the button
+            e.target.style.display = 'none';
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user's response
+            deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('✅ User accepted the A2HS prompt');
+              } else {
+                console.log('❌ User dismissed the A2HS prompt');
+              }
+              // Clear the deferred prompt
+              deferredPrompt = null;
+            });
+          }
+        });
+        
+        // Track successful installation
+        window.addEventListener('appinstalled', () => {
+          console.log('✅ PWA installed successfully');
+          deferredPrompt = null;
+          const installBtn = document.getElementById('installButton');
+          if (installBtn) {
+            installBtn.style.display = 'none';
+          }
+        });
+      </script>
     </body>
   </html>
   

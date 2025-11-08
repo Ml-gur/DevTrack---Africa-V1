@@ -142,7 +142,7 @@ interface AnalyticsMetrics {
 
 const COLORS = {
   primary: '#3b82f6',
-  success: '#10b981', 
+  success: '#10b981',
   warning: '#f59e0b',
   danger: '#ef4444',
   purple: '#8b5cf6',
@@ -150,6 +150,19 @@ const COLORS = {
   pink: '#ec4899',
   indigo: '#6366f1',
   emerald: '#059669'
+};
+
+// Format helpers - moved outside component to avoid hoisting issues
+const formatTime = (minutes: number): string => {
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours < 24) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
 };
 
 const CHART_COLORS = [
@@ -168,19 +181,6 @@ export default function EnhancedAnalyticsDashboard({
 }: EnhancedAnalyticsDashboardProps) {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('month');
   const [selectedTab, setSelectedTab] = useState('overview');
-
-  // Format helpers - moved before all useMemo hooks
-  const formatTime = (minutes: number): string => {
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours < 24) {
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
-  };
 
   // Calculate date range based on filter
   const dateRange = useMemo(() => {
