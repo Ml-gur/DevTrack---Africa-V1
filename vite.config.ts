@@ -6,7 +6,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
+    ...(process.env.NODE_ENV === 'production' ? [VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png', 'logo.svg'],
       manifest: {
@@ -88,7 +88,7 @@ export default defineConfig({
       devOptions: {
         enabled: false
       }
-    })
+    })] : []),
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],

@@ -28,7 +28,6 @@ import { StorageFullDialog } from "./components/StorageFullDialog";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 // PWA Components
-import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import PWAUpdatePrompt from "./components/PWAUpdatePrompt";
 import OfflineIndicator from "./components/OfflineIndicator";
 
@@ -419,7 +418,6 @@ function App() {
             <AppContent />
             
             {/* PWA Features */}
-            <PWAInstallPrompt />
             <PWAUpdatePrompt />
             <OfflineIndicator />
           </Suspense>
