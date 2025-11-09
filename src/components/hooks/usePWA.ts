@@ -31,10 +31,11 @@ export function usePWA(): PWAState {
 
     checkInstalled();
 
-    // Listen for install prompt
+    // Listen for install prompt - DISABLED
+    // Install prompts have been completely removed
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      // Do nothing - install prompts are disabled
     };
 
     // Listen for app installed
@@ -61,27 +62,17 @@ export function usePWA(): PWAState {
   }, []);
 
   const promptInstall = async () => {
-    if (!deferredPrompt) {
-      console.warn('Install prompt not available');
-      return;
-    }
-
-    deferredPrompt.prompt();
-    const choiceResult = await deferredPrompt.userChoice;
-    
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted install prompt');
-    }
-
-    setDeferredPrompt(null);
+    // Install functionality disabled
+    console.log('Install prompts have been disabled');
+    return;
   };
 
   const dismissInstall = () => {
-    setDeferredPrompt(null);
+    // Install functionality disabled
   };
 
   return {
-    isInstallable: !!deferredPrompt,
+    isInstallable: false, // Always false - install prompts disabled
     isInstalled,
     isStandalone: window.matchMedia('(display-mode: standalone)').matches,
     isOnline,

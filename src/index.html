@@ -203,58 +203,8 @@
         });
       }
       
-      // PWA Install Prompt
-      let deferredPrompt;
-      
-      window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent the default install prompt
-        e.preventDefault();
-        
-        // Store the event for later use
-        deferredPrompt = e;
-        
-        console.log('📱 [PWA] Install prompt available');
-        
-        // Dispatch custom event that the app can listen to
-        window.dispatchEvent(new CustomEvent('pwa-install-available', { 
-          detail: { prompt: e } 
-        }));
-      });
-      
-      // Track successful installation
-      window.addEventListener('appinstalled', (e) => {
-        console.log('✅ [PWA] App installed successfully!');
-        deferredPrompt = null;
-        
-        // Dispatch custom event
-        window.dispatchEvent(new CustomEvent('pwa-installed'));
-      });
-      
-      // Expose install function globally for the app to use
-      window.installPWA = async function() {
-        if (!deferredPrompt) {
-          console.log('⚠️ [PWA] Install prompt not available');
-          return false;
-        }
-        
-        try {
-          // Show the install prompt
-          deferredPrompt.prompt();
-          
-          // Wait for user response
-          const { outcome } = await deferredPrompt.userChoice;
-          
-          console.log(`📱 [PWA] User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} the install prompt`);
-          
-          // Clear the prompt
-          deferredPrompt = null;
-          
-          return outcome === 'accepted';
-        } catch (error) {
-          console.error('❌ [PWA] Install prompt error:', error);
-          return false;
-        }
-      };
+      // PWA Install Prompt - DISABLED
+      // All install prompt functionality has been removed
       
       // Detect if app is running as installed PWA
       window.isPWA = () => {
