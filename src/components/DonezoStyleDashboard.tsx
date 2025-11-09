@@ -8,7 +8,6 @@ import { Progress } from './ui/progress';
 import { 
   Search, 
   Plus, 
-  Download, 
   TrendingUp, 
   Users, 
   Calendar, 
@@ -176,22 +175,6 @@ export default function DonezoStyleDashboard({ user, onLogout }: DonezoStyleDash
                 <span className="text-sm font-medium">{item.label}</span>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Download App Card */}
-        <div className="p-4">
-          <div className="bg-gray-900 rounded-xl p-4 text-white relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-3">
-                <Download className="w-4 h-4" />
-              </div>
-              <h4 className="font-medium mb-1">Download our Mobile App</h4>
-              <p className="text-xs text-gray-300 mb-3">Get easy to connect away</p>
-              <Button className="w-full bg-green-500 hover:bg-green-600 text-white text-xs">
-                Download
-              </Button>
-            </div>
           </div>
         </div>
       </div>
