@@ -143,7 +143,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName?: string, country?: string, phone?: string): Promise<{ success: boolean; message?: string }> => {
     try {
       console.log('🔄 Starting registration for:', email)
-      
+
+      // Get the correct redirect URL
+      const redirectTo = import.meta.env.VITE_SITE_URL || 'https://devtrackafrica.vercel.app'
+
       // Step 1: Sign up with Supabase Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -153,7 +156,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             full_name: fullName || '',
             country: country || '',
             phone: phone || ''
-          }
+          },
+          emailRedirectTo: redirectTo
         }
       })
 
@@ -309,10 +313,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const resendConfirmation = async (email: string): Promise<{ success: boolean; message?: string; error?: string }> => {
     try {
       console.log('📧 Resending confirmation email to:', email)
-      
+
+      // Get the correct redirect URL
+      const redirectTo = import.meta.env.VITE_SITE_URL || 'https://devtrackafrica.vercel.app'
+
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: email
+        email: email,
+        options: {
+          emailRedirectTo: redirectTo
+        }
       })
 
       if (error) {
