@@ -8,11 +8,14 @@ const getSupabaseConfig = () => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bxytbgpqpltujtoabmxa.supabase.co'
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4eXRiZ3BxcGx0dWp0b2FibXhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzODQ5OTQsImV4cCI6MjA3Nzk2MDk5NH0.n2rxSXvWO5ksSe68WCAbBnWhZ63Rfy_P8AAKskWcXNA'
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'bxytbgpqpltujtoabmxa'
+  // Use environment variable for site URL, fallback to production URL
+  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://devtrackafrica.vercel.app'
 
   return {
     url: supabaseUrl,
     anonKey: anonKey,
-    projectId: projectId
+    projectId: projectId,
+    siteUrl: siteUrl
   }
 }
 
@@ -34,7 +37,9 @@ export const supabase = createClient(config.url, config.anonKey, {
     // Set session storage key
     storageKey: 'devtrack-auth-token',
     // Disable flow type for better compatibility
-    flowType: 'pkce'
+    flowType: 'pkce',
+    // Set site URL for email confirmation redirects
+    siteUrl: config.siteUrl
   },
   realtime: {
     params: {

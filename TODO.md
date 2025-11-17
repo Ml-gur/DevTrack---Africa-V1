@@ -1,14 +1,23 @@
-# PWA Enhancement Plan
 
-## Current Issues
-- Basic service worker with no caching
-- Dual install prompt handling (HTML + React)
-- No offline fallback handling
-- Service worker update management
+# Fix Email Verification Redirect Issue
 
+## Problem
+Email verification links are redirecting to localhost instead of the production website (https://devtrackafrica.vercel.app).
+
+## Root Cause
+The Supabase client configuration doesn't specify a site URL, so it defaults to the current domain (localhost during development).
+
+## Solution
+Configure the Supabase client with the correct site URL for production redirects.
 ## Tasks
-- [ ] Enhance service worker with proper caching strategies
-- [ ] Remove duplicate install prompt handling
-- [ ] Add offline fallback page
-- [ ] Improve service worker update handling
-- [ ] Test PWA installation and offline functionality
+- [x] Update Supabase client configuration to include site URL
+- [x] Test the configuration to ensure redirects work correctly
+- [ ] Verify email confirmation flow works in production
+
+## Files Modified
+- src/lib/supabaseClient.ts - Added site URL configuration to auth settings
+
+## Changes Made
+- Added `siteUrl` to the Supabase config object
+- Set `siteUrl` in the auth configuration to ensure email confirmation links redirect to the correct domain
+- Used environment variable `VITE_SITE_URL` with fallback to production URL
