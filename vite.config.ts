@@ -82,7 +82,9 @@ export default defineConfig({
             }
           }
         ],
-        navigateFallback: '/offline.html',
+        // Always fall back to the SPA shell so Supabase magic-link callbacks
+        // like "/?code=..." are handled instead of being treated as offline.
+        navigateFallback: '/index.html',
         navigateFallbackAllowlist: [/^(?!\/__).*/]
       },
       devOptions: {

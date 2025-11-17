@@ -9,11 +9,20 @@ export default function PWAUpdatePrompt() {
   const [show, setShow] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const isInstalled =
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true);
+
   useEffect(() => {
     if (updateAvailable) {
       setShow(true);
     }
   }, [updateAvailable]);
+
+  if (isInstalled) {
+    return null;
+  }
 
   const handleUpdate = async () => {
     setIsUpdating(true);

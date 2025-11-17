@@ -16,7 +16,21 @@ Configure the Supabase client with the correct site URL for production redirects
 - [x] Add auth callback handler to process email confirmation codes
 - [x] Improve error handling and URL cleanup for auth callbacks
 - [x] Build completed successfully
+- [ ] Verify Supabase dashboard configuration (site URL and redirect URLs)
 - [ ] Verify email confirmation flow works in production
+
+## Supabase Configuration Required
+To complete the email verification fix, ensure the following in your Supabase dashboard:
+
+1. **Site URL**: Set to `https://devtrackafrica.vercel.app`
+   - Go to Authentication > Settings > Site URL
+
+2. **Redirect URLs**: Add `https://devtrackafrica.vercel.app`
+   - Go to Authentication > Settings > Redirect URLs
+
+3. **Environment Variables**: Ensure `VITE_SITE_URL` is set to `https://devtrackafrica.vercel.app` in Vercel
+
+This configuration is required for the `exchangeCodeForSession` to work properly during email verification callbacks.
 
 ## Files Modified
 - src/lib/supabaseClient.ts - Added site URL configuration to auth settings
