@@ -36,18 +36,46 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state
   useEffect(() => {
     console.log('🔄 Initializing Supabase auth...')
-    
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        loadProfile(session.user.id, session.access_token)
-      } else {
-        setLoading(false)
+
+    // Handle email confirmation callback if present in URL
+    const handleAuthCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const code = urlParams.get('code')
+
+      if (code) {
+        console.log('🔄 Processing auth callback with code...')
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error) {
+            console.error('❌ Auth callback error:', error)
+          } else if (data.session) {
+            console.log('✅ Auth callback successful, session established')
+            setSession(data.session)
+            setUser(data.session.user)
+            await loadProfile(data.session.user.id, data.session.access_token)
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname)
+            return
+          }
+        } catch (err) {
+          console.error('❌ Auth callback failed:', err)
+        }
       }
-    })
+
+      // Get initial session if no callback
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+
+        if (session?.user) {
+          loadProfile(session.user.id, session.access_token)
+        } else {
+          setLoading(false)
+        }
+      })
+    }
+
+    handleAuthCallback()
 
     // Listen for auth changes
     const {
@@ -56,7 +84,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       console.log('🔄 Auth state changed:', _event)
       setSession(session)
       setUser(session?.user ?? null)
-      
+
       if (session?.user) {
         loadProfile(session.user.id, session.access_token)
       } else {
