@@ -9,10 +9,26 @@ export default function PWAUpdatePrompt() {
   const [show, setShow] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  if (typeof window !== 'undefined') {
+    console.log('=== PWA UPDATE PROMPT DEBUG ===');
+    console.log(
+      'Display mode:',
+      window.matchMedia('(display-mode: standalone)').matches,
+    );
+    console.log('iOS standalone:', (window.navigator as any).standalone);
+    console.log('updateAvailable:', updateAvailable);
+    console.log('Current location:', window.location.href);
+    console.log('================================');
+  }
+
   const isInstalled =
     typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true);
+
+  if (typeof window !== 'undefined') {
+    console.log('isInstalled result:', isInstalled);
+  }
 
   useEffect(() => {
     if (updateAvailable) {
@@ -21,7 +37,14 @@ export default function PWAUpdatePrompt() {
   }, [updateAvailable]);
 
   if (isInstalled) {
+    if (typeof window !== 'undefined') {
+      console.log('HIDING PROMPT - App is installed');
+    }
     return null;
+  }
+
+  if (typeof window !== 'undefined') {
+    console.log('SHOWING PROMPT - App is NOT installed');
   }
 
   const handleUpdate = async () => {
