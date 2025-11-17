@@ -41,6 +41,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     const handleAuthCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
+      const error = urlParams.get('error')
+      const errorDescription = urlParams.get('error_description')
+
+      if (error) {
+        console.error('❌ Auth callback error:', error, errorDescription)
+        // Clean up URL even on error
+        window.history.replaceState({}, document.title, window.location.pathname)
+        setLoading(false)
+        return
+      }
 
       if (code) {
         console.log('🔄 Processing auth callback with code...')
@@ -48,17 +58,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           const { data, error } = await supabase.auth.exchangeCodeForSession(code)
           if (error) {
             console.error('❌ Auth callback error:', error)
+            // Clean up URL even on error
+            window.history.replaceState({}, document.title, window.location.pathname)
+            setLoading(false)
+            return
           } else if (data.session) {
             console.log('✅ Auth callback successful, session established')
             setSession(data.session)
             setUser(data.session.user)
             await loadProfile(data.session.user.id, data.session.access_token)
-            // Clean up URL
+            // Clean up URL - remove all query parameters
             window.history.replaceState({}, document.title, window.location.pathname)
+            console.log('🧹 URL cleaned up, removed code parameter')
             return
           }
         } catch (err) {
           console.error('❌ Auth callback failed:', err)
+          // Clean up URL even on error
+          window.history.replaceState({}, document.title, window.location.pathname)
+          setLoading(false)
+          return
         }
       }
 
