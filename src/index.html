@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Cache Control for Development -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <!-- Primary Meta Tags -->
+    <title>DevTrack Africa</title>
+    <meta name="title" content="DevTrack Africa" />
+    <meta name="description" content="The ultimate project management platform designed specifically for African developers. Track your coding journey, collaborate with peers, and showcase your projects to the world." />
+    <meta name="keywords" content="project management, developers, africa, coding, programming, kanban, collaboration, tech, software development" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="author" content="DevTrack Africa Team" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://devtrack-africa.vercel.app/" />
+    <meta property="og:title" content="DevTrack Africa" />
+    <meta property="og:description" content="The ultimate project management platform designed specifically for African developers. Track your coding journey, collaborate with peers, and showcase your projects to the world." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:site_name" content="DevTrack Africa" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://devtrack-africa.vercel.app/" />
+    <meta property="twitter:title" content="DevTrack Africa" />
+    <meta property="twitter:description" content="The ultimate project management platform designed specifically for African developers. Track your coding journey, collaborate with peers, and showcase your projects to the world." />
+    <meta property="twitter:image" content="/og-image.png" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DevTrack" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="DevTrack Africa" />
+    <meta name="msapplication-TileColor" content="#10b981" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/splash/iphone5.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash/iphone6.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash/iphoneplus.png" media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/iphonex.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/iphonexr.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash/iphonexsmax.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/ipad.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash/ipadpro1.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash/ipadpro2.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Favicon & PWA Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/site.webmanifest" />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "DevTrack Africa",
+      "description": "The ultimate project management platform designed specifically for African developers",
+      "url": "https://devtrack-africa.vercel.app",
+      "applicationCategory": "ProjectManagementApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "DevTrack Africa Team"
+      }
+    }
+    </script>
+
+    <!-- Load critical CSS inline -->
+    <style>
+      /* Critical CSS for immediate render */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        line-height: 1.6;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+      }
+      
+      #root {
+        min-height: 100vh;
+      }
+      
+      /* Loading animation */
+      .loading-spinner {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        gap: 1rem;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Fallback loading state -->
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading DevTrack Africa...</p>
+      </div>
+    </div>
+    
+    <!-- Service Worker Registration & PWA Setup -->
+    <script>
+      /**
+       * DevTrack Africa - PWA Service Worker Registration
+       * Enables offline functionality, app installation, and updates
+       */
+      
+      // Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+          try {
+            // Register the service worker
+            const registration = await navigator.serviceWorker.register('/service-worker.js', {
+              scope: '/'
+            });
+            
+            console.log('✅ [PWA] Service Worker registered successfully:', registration.scope);
+            
+            // Check for updates every minute
+            setInterval(() => {
+              registration.update();
+            }, 60000);
+            
+            // Handle service worker updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('🔄 [PWA] New version available!');
+                    
+                    // Show update notification
+                    const updateAvailable = confirm(
+                      '🎉 A new version of DevTrack Africa is available!\\n\\nClick OK to update now and get the latest features.'
+                    );
+                    
+                    if (updateAvailable) {
+                      newWorker.postMessage({ action: 'skipWaiting' });
+                      window.location.reload();
+                    }
+                  }
+                });
+              }
+            });
+            
+          } catch (error) {
+            console.error('❌ [PWA] Service Worker registration failed:', error);
+          }
+        });
+        
+        // Handle service worker controller changes
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('🔄 [PWA] Service Worker updated');
+          window.location.reload();
+        });
+      }
+      
+      // PWA Install Prompt - DISABLED
+      // All install prompt functionality has been removed
+      
+      // Detect if app is running as installed PWA
+      window.isPWA = () => {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+               window.navigator.standalone === true ||
+               document.referrer.includes('android-app://');
+      };
+      
+      // Log PWA status
+      if (window.isPWA()) {
+        console.log('✅ [PWA] Running as installed app');
+      } else {
+        console.log('🌐 [PWA] Running in browser');
+      }
+      
+      // Handle online/offline events
+      window.addEventListener('online', () => {
+        console.log('🌐 [PWA] Back online');
+        window.dispatchEvent(new CustomEvent('connection-status-changed', { 
+          detail: { online: true } 
+        }));
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('📵 [PWA] Gone offline');
+        window.dispatchEvent(new CustomEvent('connection-status-changed', { 
+          detail: { online: false } 
+        }));
+      });
+      
+      // Display mode detection
+      const displayMode = window.matchMedia('(display-mode: standalone)').matches ? 'standalone' :
+                         window.matchMedia('(display-mode: fullscreen)').matches ? 'fullscreen' :
+                         window.matchMedia('(display-mode: minimal-ui)').matches ? 'minimal-ui' :
+                         'browser';
+      
+      console.log('📱 [PWA] Display mode:', displayMode);
+    </script>
+    
+    <script type="module" src="/App.tsx"></script>
+  </body>
+</html>

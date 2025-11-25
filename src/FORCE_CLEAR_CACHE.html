@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTrack Africa - Clear Cache</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .step {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .step h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .step p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .step code {
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .success {
+            background: #48bb78;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .warning {
+            background: #fef5e7;
+            border: 1px solid #f39c12;
+            color: #c87f0a;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .keyboard-shortcut {
+            background: #edf2f7;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .keyboard-shortcut kbd {
+            background: white;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-family: monospace;
+            margin: 0 2px;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Clear DevTrack Africa Cache</h1>
+        <p class="subtitle">Fix authentication and loading issues by clearing your browser cache</p>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong>
+            This will clear all cached data and force a fresh reload of the application. You will need to log in again.
+        </div>
+        
+        <div class="step">
+            <h3>
+                <div class="step-number">1</div>
+                Clear Browser Cache
+            </h3>
+            <p>Use keyboard shortcuts to hard refresh:</p>
+            <div class="keyboard-shortcut">
+                <strong>Windows/Linux:</strong> <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd><br>
+                <strong>Mac:</strong> <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>
+                <div class="step-number">2</div>
+                Clear Site Data (Recommended)
+            </h3>
+            <p>For a complete reset, clear all site data:</p>
+            <div class="keyboard-shortcut">
+                1. Press <kbd>F12</kbd> to open DevTools<br>
+                2. Go to <strong>Application</strong> tab<br>
+                3. Click <strong>Clear site data</strong><br>
+                4. Refresh the page
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>
+                <div class="step-number">3</div>
+                Automatic Cache Clear
+            </h3>
+            <p>Click the button below to automatically clear cache and reload:</p>
+            <button onclick="clearAllCache()">🚀 Clear Cache & Reload</button>
+        </div>
+        
+        <div class="success" id="successMsg">
+            ✅ Cache cleared! Redirecting to DevTrack Africa...
+        </div>
+    </div>
+    
+    <script>
+        async function clearAllCache() {
+            try {
+                // Clear service worker caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                    console.log('✅ Service Worker caches cleared');
+                }
+                
+                // Clear localStorage
+                localStorage.clear();
+                console.log('✅ localStorage cleared');
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                console.log('✅ sessionStorage cleared');
+                
+                // Clear IndexedDB
+                if ('indexedDB' in window) {
+                    const databases = await indexedDB.databases();
+                    databases.forEach(db => {
+                        if (db.name) {
+                            indexedDB.deleteDatabase(db.name);
+                        }
+                    });
+                    console.log('✅ IndexedDB cleared');
+                }
+                
+                // Unregister service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(
+                        registrations.map(registration => registration.unregister())
+                    );
+                    console.log('✅ Service Workers unregistered');
+                }
+                
+                // Show success message
+                document.getElementById('successMsg').style.display = 'block';
+                
+                // Redirect to home with cache busting
+                setTimeout(() => {
+                    const timestamp = new Date().getTime();
+                    window.location.href = `/?nocache=${timestamp}`;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                alert('Some caches could not be cleared. Please use manual method (Ctrl+Shift+R)');
+            }
+        }
+        
+        // Alternative: Add timestamp to force reload
+        window.addEventListener('load', () => {
+            // Check if we need to force reload
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('cleared')) {
+                console.log('Cache clearing page loaded');
+            }
+        });
+    </script>
+</body>
+</html>
