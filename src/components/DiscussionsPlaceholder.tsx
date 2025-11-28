@@ -203,7 +203,226 @@ export default function CommunityPage() {
         }
     }
 
-    // ... (rest of functions unchanged)
+    const getAvatarColor = (name: string | null) => {
+        const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500']
+        if (!name) return colors[0]
+        let hash = 0
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash)
+        }
+        return colors[Math.abs(hash) % colors.length]
+    }
+
+    const getTagStyle = (tag: string, index: number) => {
+        const styles = [
+            'bg-blue-100 text-blue-800',
+            'bg-green-100 text-green-800',
+            'bg-purple-100 text-purple-800',
+            'bg-yellow-100 text-yellow-800',
+            'bg-pink-100 text-pink-800'
+        ]
+        return styles[index % styles.length]
+    }
+
+    const loadComments = async (discussionId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('discussion_comments')
+                .select('*')
+                .eq('discussion_id', discussionId)
+                .order('created_at', { ascending: true })
+
+            if (error) throw error
+            setComments(prev => ({ ...prev, [discussionId]: data || [] }))
+        } catch (error) {
+            console.error('Error loading comments:', error)
+        }
+    }
+
+    const handleJoinDiscussion = async (discussionId: string) => {
+        if (!joinedDiscussions.has(discussionId)) {
+            saveJoinedDiscussion(discussionId)
+        }
+
+        if (expandedDiscussionId === discussionId) {
+            setExpandedDiscussionId(null)
+        } else {
+            setExpandedDiscussionId(discussionId)
+            await loadComments(discussionId)
+        }
+    }
+
+    const handleCreateDiscussion = async () => {
+        if (!newDiscussion.title || !newDiscussion.content || !currentUserId) return
+
+        try {
+            const { error } = await supabase
+                .from('discussions')
+                .insert({
+                    title: newDiscussion.title,
+                    content: newDiscussion.content,
+                    category: newDiscussion.category,
+                    tags: newDiscussion.tags.split(',').map(t => t.trim()).filter(Boolean),
+                    author_id: currentUserId
+                })
+
+            if (error) throw error
+
+            setShowNewDiscussionModal(false)
+            setNewDiscussion({ title: '', content: '', tags: '', category: 'Tech Help & Q&A' })
+            await loadDiscussions()
+        } catch (error) {
+            console.error('Error creating discussion:', error)
+        }
+    }
+
+    const handleUpdateDiscussion = async () => {
+        if (!editingDiscussion || !editingDiscussion.title || !editingDiscussion.content) return
+
+        try {
+            const { error } = await supabase
+                .from('discussions')
+                .update({
+                    title: editingDiscussion.title,
+                    content: editingDiscussion.content,
+                    tags: editingDiscussion.tags
+                })
+                .eq('id', editingDiscussion.id)
+
+            if (error) throw error
+
+            setEditingDiscussion(null)
+            await loadDiscussions()
+        } catch (error) {
+            console.error('Error updating discussion:', error)
+        }
+    }
+
+    const handleDeleteDiscussion = async (discussionId: string, authorId: string) => {
+        if (currentUserId !== authorId) return
+        if (!confirm('Are you sure you want to delete this discussion?')) return
+
+        try {
+            const { error } = await supabase
+                .from('discussions')
+                .delete()
+                .eq('id', discussionId)
+
+            if (error) throw error
+            await loadDiscussions()
+        } catch (error) {
+            console.error('Error deleting discussion:', error)
+        }
+    }
+
+    const handleLikeDiscussion = async (discussionId: string) => {
+        if (!currentUserId) return
+
+        try {
+            // Check if already liked
+            const { data: existingLike } = await supabase
+                .from('discussion_likes')
+                .select('*')
+                .eq('discussion_id', discussionId)
+                .eq('user_id', currentUserId)
+                .single()
+
+            if (existingLike) {
+                // Unlike
+                await supabase
+                    .from('discussion_likes')
+                    .delete()
+                    .eq('id', existingLike.id)
+            } else {
+                // Like
+                await supabase
+                    .from('discussion_likes')
+                    .insert({
+                        discussion_id: discussionId,
+                        user_id: currentUserId
+                    })
+            }
+
+            await loadDiscussions()
+        } catch (error) {
+            console.error('Error liking discussion:', error)
+        }
+    }
+
+    const handleBookmark = async (discussionId: string) => {
+        if (!currentUserId) return
+
+        try {
+            // Check if already bookmarked
+            const { data: existingBookmark } = await supabase
+                .from('discussion_bookmarks')
+                .select('*')
+                .eq('discussion_id', discussionId)
+                .eq('user_id', currentUserId)
+                .single()
+
+            if (existingBookmark) {
+                await supabase
+                    .from('discussion_bookmarks')
+                    .delete()
+                    .eq('id', existingBookmark.id)
+            } else {
+                await supabase
+                    .from('discussion_bookmarks')
+                    .insert({
+                        discussion_id: discussionId,
+                        user_id: currentUserId
+                    })
+            }
+        } catch (error) {
+            console.error('Error bookmarking:', error)
+        }
+    }
+
+    const handleAddComment = async (discussionId: string) => {
+        const content = newComment[discussionId]
+        if (!content || !content.trim() || !currentUserId) return
+
+        try {
+            const { error } = await supabase
+                .from('discussion_comments')
+                .insert({
+                    discussion_id: discussionId,
+                    content: content,
+                    author_id: currentUserId
+                })
+
+            if (error) throw error
+
+            setNewComment({ ...newComment, [discussionId]: '' })
+            await loadComments(discussionId)
+            await loadDiscussions()
+        } catch (error) {
+            console.error('Error adding comment:', error)
+        }
+    }
+
+    const getFilteredDiscussions = () => {
+        let filtered = [...discussions]
+
+        if (activeCategory !== 'All Discussions') {
+            filtered = filtered.filter(d => d.category === activeCategory)
+        }
+
+        switch (sortBy) {
+            case 'Most Recent':
+                filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                break
+            case 'Most Popular':
+                filtered.sort((a, b) => (b.likes_count + b.comments_count) - (a.likes_count + a.comments_count))
+                break
+            case 'Unanswered':
+                filtered = filtered.filter(d => d.comments_count === 0)
+                break
+        }
+
+        return filtered
+    }
 
     const filteredDiscussions = getFilteredDiscussions()
 
