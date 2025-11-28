@@ -5,6 +5,17 @@ All notable changes to DevTrack Africa will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-26
+
+### Added
+- 💬 **Community Discussions**: Full-featured discussion board with categories, tags, and rich text support.
+- 🗄️ **Database Schema**: SQL migration for discussions, comments, likes, and bookmarks tables.
+- 👤 **User Integration**: Discussions and comments now reflect the currently logged-in user's profile.
+
+### Changed
+- 🎨 **UI Improvements**: Refined spacing in discussion cards for a denser, cleaner look.
+- 🧹 **Cleanup**: Removed redundant headers from the Community page to integrate seamlessly with the dashboard.
+
 ## [1.0.0] - 2025-11-03
 
 ### 🎉 Initial Production Release

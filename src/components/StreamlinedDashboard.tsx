@@ -32,7 +32,8 @@ import {
   ChevronRight,
   Calendar,
   MessageSquare,
-  FolderSearch
+  FolderSearch,
+  ChevronDown
 } from 'lucide-react';
 import {
   Dashboard,
@@ -43,6 +44,7 @@ import {
   ChevronDown as ChevronDownIcon,
   Search as SearchIcon,
 } from '@carbon/icons-react';
+import { Task as UITask } from '../types/task';
 
 // Import keyboard shortcuts manager (not lazy - needs to be active always)
 import KeyboardShortcutsManager from './KeyboardShortcutsManager';
@@ -53,7 +55,8 @@ const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const ProjectCreationHub = lazy(() => import('./ProjectCreationHub'));
 const EnhancedAnalyticsDashboard = lazy(() => import('./EnhancedAnalyticsDashboard'));
 const ProfileViewer = lazy(() => import('./ProfileViewer'));
-const CommunityPlaceholder = lazy(() => import('./CommunityPlaceholder'));
+const DiscussionsPlaceholder = lazy(() => import('./DiscussionsPlaceholder'));
+const DiscoverProjectsPage = lazy(() => import('./DiscoverProjectsPage'));
 
 export default function StreamlinedDashboard() {
   const { user, profile, signOut } = useAuth();
@@ -73,7 +76,15 @@ export default function StreamlinedDashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [activeNav, setActiveNav] = useState<string>('overview'); // Changed from currentTab
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeCommunitySection, setActiveCommunitySection] = useState<string>('events'); // Community submenu
+  const [communityExpanded, setCommunityExpanded] = useState(false);
+
+  // Auto-expand community menu if active nav is a child
+  useEffect(() => {
+    if (activeNav === 'discussions' || activeNav === 'discover') {
+      setCommunityExpanded(true);
+    }
+  }, [activeNav]);
+
 
   // Load data
   useEffect(() => {
@@ -189,17 +200,24 @@ export default function StreamlinedDashboard() {
     }
   };
 
-  const handleTaskCreate = async (newTask: Omit<LocalTask, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleTaskCreate = async (newTask: Omit<UITask, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
 
     try {
-      const task = await localDatabase.createTask({
+      const taskToCreate = {
         ...newTask,
-        userId: user.id
-      });
+        userId: newTask.userId || user.id,
+        description: newTask.description || '',
+        tags: newTask.tags || [],
+        timeSpentMinutes: newTask.timeSpentMinutes || 0,
+        dependencies: newTask.dependencies || []
+      };
 
-      setTasks(prev => [...prev, task]);
-      toast.success('Task created successfully');
+      const createdTask = await localDatabase.createTask(taskToCreate);
+      if (createdTask) {
+        setTasks(prev => [createdTask, ...prev]);
+        toast.success('Task created successfully');
+      }
     } catch (error) {
       console.error('Error creating task:', error);
       toast.error('Failed to create task');
@@ -262,7 +280,7 @@ export default function StreamlinedDashboard() {
     const hasTodo = projectTasks.some(t => t.status === 'todo');
 
     const updates: Partial<LocalProject> = {
-      progress
+      // progress is calculated but not stored in DB
     };
 
     // Auto-update status based on task completion
@@ -280,7 +298,7 @@ export default function StreamlinedDashboard() {
     }
 
     // Only update if there are changes
-    if (updates.status !== project.status || updates.progress !== project.progress) {
+    if (updates.status && updates.status !== project.status) {
       const updated = await localDatabase.updateProject(projectId, updates);
       if (updated) {
         setProjects(prev => prev.map(p => p.id === projectId ? updated : p));
@@ -291,7 +309,7 @@ export default function StreamlinedDashboard() {
     }
   };
 
-  const handleProjectUpdate = async (projectId: string, updates: Partial<LocalProject>) => {
+  const handleProjectUpdate = async (projectId: string, updates: any) => {
     try {
       const project = projects.find(p => p.id === projectId);
       if (!project) return;
@@ -307,7 +325,12 @@ export default function StreamlinedDashboard() {
         }
       }
 
-      const updated = await localDatabase.updateProject(projectId, updates);
+      const safeUpdates = {
+        ...updates,
+        description: updates.description || undefined
+      };
+
+      const updated = await localDatabase.updateProject(projectId, safeUpdates);
       if (updated) {
         setProjects(prev => prev.map(p => p.id === projectId ? updated : p));
         if (selectedProject?.id === projectId) {
@@ -413,80 +436,7 @@ export default function StreamlinedDashboard() {
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50 to-white overflow-hidden">
       {/* Left Icon Rail */}
-      <aside className="bg-neutral-900 flex flex-col gap-2 items-center p-3 w-16 border-r border-neutral-800">
-        {/* Logo */}
-        <div className="mb-2 size-10 flex items-center justify-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-            <Rocket className="w-5 h-5 text-white" />
-          </div>
-        </div>
 
-        {/* Navigation Icons */}
-        <div className="flex flex-col gap-2 w-full items-center">
-          <button
-            onClick={() => setActiveNav('overview')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'overview' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Overview"
-          >
-            <Dashboard size={18} />
-          </button>
-
-          <button
-            onClick={() => setActiveNav('projects')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'projects' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Projects"
-          >
-            <Folder size={18} />
-          </button>
-
-          <button
-            onClick={() => setActiveNav('analytics')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'analytics' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Analytics"
-          >
-            <Analytics size={18} />
-          </button>
-
-          <button
-            onClick={() => setActiveNav('community')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'community' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Community"
-          >
-            <UserMultiple size={18} />
-          </button>
-        </div>
-
-        <div className="flex-1" />
-
-        {/* Bottom Icons */}
-        <div className="flex flex-col gap-2 w-full items-center">
-          <button
-            onClick={() => setShowSettings(true)}
-            className="flex items-center justify-center rounded-lg size-10 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 transition-all duration-300"
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Settings"
-          >
-            <SettingsIcon className="w-4 h-4" />
-          </button>
-
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-green-600 rounded-full flex items-center justify-center cursor-pointer"
-            onClick={() => setShowProfile(true)}
-            title={profile?.fullName || user.email || 'Profile'}
-          >
-            <span className="text-white text-xs font-bold">
-              {profile?.fullName ? profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
-            </span>
-          </div>
-        </div>
-      </aside>
 
       {/* Right Detail Sidebar */}
       <aside
@@ -521,7 +471,8 @@ export default function StreamlinedDashboard() {
                 {activeNav === 'overview' && 'Dashboard'}
                 {activeNav === 'projects' && 'Projects'}
                 {activeNav === 'analytics' && 'Analytics'}
-                {activeNav === 'community' && 'Community'}
+                {activeNav === 'discussions' && 'Community Discussions'}
+                {activeNav === 'discover' && 'Discover Projects'}
               </h2>
               <button
                 onClick={() => setSidebarCollapsed(true)}
@@ -579,6 +530,49 @@ export default function StreamlinedDashboard() {
               )}
             </button>
 
+            {/* Community Section */}
+            <div>
+              <button
+                onClick={() => setCommunityExpanded(!communityExpanded)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'discussions' || activeNav === 'discover'
+                  ? 'text-blue-700 font-semibold'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+              >
+                <Users className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'discussions' || activeNav === 'discover' ? 'scale-110' : 'group-hover:scale-105'}`} />
+                <span className="flex-1 text-left text-sm">Community</span>
+                {communityExpanded ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+
+              {/* Community Sub-menu */}
+              {communityExpanded && (
+                <div className="ml-4 pl-4 border-l border-gray-200 space-y-1 mt-1">
+                  <button
+                    onClick={() => setActiveNav('discussions')}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm ${activeNav === 'discussions'
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                  >
+                    <span>Discussions</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveNav('discover')}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm ${activeNav === 'discover'
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                  >
+                    <span>Discover Amazing Projects</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setActiveNav('analytics')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'analytics'
@@ -589,20 +583,6 @@ export default function StreamlinedDashboard() {
               <BarChart3 className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'analytics' ? 'scale-110' : 'group-hover:scale-105'}`} />
               <span className="flex-1 text-left text-sm">Analytics</span>
               {activeNav === 'analytics' && (
-                <div className="w-1.5 h-5 bg-blue-600 rounded-full animate-pulse" />
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveNav('community')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'community'
-                ? 'bg-gradient-to-r from-blue-50 to-green-50 text-blue-700 font-semibold shadow-sm'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-            >
-              <Users className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'community' ? 'scale-110' : 'group-hover:scale-105'}`} />
-              <span className="flex-1 text-left text-sm">Community</span>
-              {activeNav === 'community' && (
                 <div className="w-1.5 h-5 bg-blue-600 rounded-full animate-pulse" />
               )}
             </button>
@@ -697,65 +677,118 @@ export default function StreamlinedDashboard() {
         <div className="px-6 py-8">
           {/* Overview Page */}
           {activeNav === 'overview' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
                   Welcome back, {profile?.fullName || user.email?.split('@')[0]}!
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-lg font-medium leading-relaxed">
                   Here's what's happening with your projects today.
                 </p>
               </div>
 
+              {/* Today's Focus */}
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 tracking-tight">Today's Focus</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Priority Tasks Card */}
+                  <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="font-bold text-lg text-gray-900">Priority Tasks</h4>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-semibold">
+                          {tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length} Due
+                        </Badge>
+                      </div>
+                      {tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length > 0 ? (
+                        <div className="space-y-3">
+                          {tasks.filter(t => t.priority === 'high' && t.status !== 'completed').slice(0, 3).map(task => (
+                            <div key={task.id} className="flex items-center gap-3 text-sm p-3 rounded-lg hover:bg-gray-50 cursor-pointer border border-transparent hover:border-gray-100 transition-all">
+                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${task.priority === 'high' ? 'bg-red-500' : 'bg-yellow-500'}`} />
+                              <span className="flex-1 truncate font-medium text-gray-700">{task.title}</span>
+                              <span className="text-xs font-medium text-gray-500">
+                                {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic font-medium">No high priority tasks. Great job!</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Upcoming Deadlines / Quick Stats */}
+                  <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <h4 className="font-bold text-lg text-gray-900 mb-4">Quick Stats</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-50 rounded-xl text-center border border-gray-100">
+                          <p className="text-3xl font-extrabold text-gray-900">{stats.activeProjects}</p>
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Active Projects</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-xl text-center border border-gray-100">
+                          <p className="text-3xl font-extrabold text-green-600">{stats.completedTasks}</p>
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Tasks Done</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <Card
-                  className="border-blue-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  className="group hover:border-blue-400 transition-all cursor-pointer shadow-sm hover:shadow-lg border-gray-200"
                   onClick={() => setActiveNav('projects')}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FolderOpen className="w-6 h-6 text-blue-600" />
+                      <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm">
+                        <FolderOpen className="w-7 h-7 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">My Projects</h3>
-                        <p className="text-sm text-gray-600">{stats.totalProjects} total projects</p>
+                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-700 transition-colors">My Projects</h3>
+                        <p className="text-sm font-medium text-gray-500">Manage your work</p>
                       </div>
+                      <ChevronRight className="w-5 h-5 text-gray-300 ml-auto group-hover:text-blue-500 transition-colors" />
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card
-                  className="border-green-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  className="group hover:border-green-400 transition-all cursor-pointer shadow-sm hover:shadow-lg border-gray-200"
                   onClick={() => setActiveNav('analytics')}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <BarChart3 className="w-6 h-6 text-green-600" />
+                      <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-green-100 transition-colors shadow-sm">
+                        <BarChart3 className="w-7 h-7 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">Analytics</h3>
-                        <p className="text-sm text-gray-600">View insights</p>
+                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-green-700 transition-colors">Analytics</h3>
+                        <p className="text-sm font-medium text-gray-500">View insights</p>
                       </div>
+                      <ChevronRight className="w-5 h-5 text-gray-300 ml-auto group-hover:text-green-500 transition-colors" />
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card
-                  className="border-purple-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setActiveNav('community')}
+                  className="group hover:border-purple-400 transition-all cursor-pointer shadow-sm hover:shadow-lg border-gray-200"
+                  onClick={() => setActiveNav('discussions')}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Users className="w-6 h-6 text-purple-600" />
+                      <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 transition-colors shadow-sm">
+                        <Users className="w-7 h-7 text-purple-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">Community</h3>
-                        <p className="text-sm text-gray-600">Connect & collaborate</p>
+                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-700 transition-colors">Community</h3>
+                        <p className="text-sm font-medium text-gray-500">Connect & collaborate</p>
                       </div>
+                      <ChevronRight className="w-5 h-5 text-gray-300 ml-auto group-hover:text-purple-500 transition-colors" />
                     </div>
                   </CardContent>
                 </Card>
@@ -763,21 +796,22 @@ export default function StreamlinedDashboard() {
 
               {/* Recent Projects */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">Recent Projects</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Recent Projects</h3>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setActiveNav('projects')}
+                    className="font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   >
                     View all
                   </Button>
                 </div>
 
                 {projects.length === 0 ? (
-                  <Card className="border-blue-200 shadow-sm">
+                  <Card className="border-dashed border-2 border-gray-200 shadow-none bg-gray-50/50">
                     <CardContent className="py-12 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
                         <FolderOpen className="w-8 h-8 text-blue-600" />
                       </div>
                       <h3 className="text-lg font-semibold mb-2 text-gray-900">No projects yet</h3>
@@ -797,27 +831,49 @@ export default function StreamlinedDashboard() {
                     {projects.slice(0, 6).map((project) => (
                       <Card
                         key={project.id}
-                        className="hover:shadow-lg transition-all cursor-pointer group border-gray-200 shadow-sm"
+                        className="hover:shadow-lg transition-all cursor-pointer group border-gray-200 shadow-sm overflow-hidden"
                         onClick={() => setSelectedProject(project)}
                       >
+                        <div className="h-2 bg-gradient-to-r from-blue-500 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="p-5">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-base text-gray-900 group-hover:text-green-600 transition-colors line-clamp-1">
-                              {project.title}
-                            </h3>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${project.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                project.status === 'in_progress' ? 'bg-blue-100 text-blue-600' :
+                                  'bg-gray-100 text-gray-600'
+                                }`}>
+                                <FolderOpen className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-base text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                                  {project.title}
+                                </h3>
+                                <span className="text-xs text-gray-500">
+                                  Updated {new Date(project.updated_at || project.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
                             <Badge className={getPriorityColor(project.priority)}>
                               {project.priority}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                            {project.description}
+
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[2.5em]">
+                            {project.description || "No description provided."}
                           </p>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getStatusColor(project.status)}>
-                              {project.status?.replace('_', ' ')}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              {tasks.filter(t => t.projectId === project.id).length} tasks
+
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className={`text-xs ${project.status === 'completed' ? 'text-green-600 border-green-200 bg-green-50' :
+                                project.status === 'in_progress' ? 'text-blue-600 border-blue-200 bg-blue-50' :
+                                  'text-gray-600 border-gray-200 bg-gray-50'
+                                }`}>
+                                {project.status?.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                            <span className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3" />
+                              {tasks.filter(t => t.projectId === project.id && t.status === 'completed').length} / {tasks.filter(t => t.projectId === project.id).length}
                             </span>
                           </div>
                         </div>
@@ -918,7 +974,7 @@ export default function StreamlinedDashboard() {
                               variant="ghost"
                               size="sm"
                               className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => {
+                              onClick={(e: React.MouseEvent) => {
                                 e.stopPropagation();
                                 setSelectedProject(project);
                               }}
@@ -947,10 +1003,17 @@ export default function StreamlinedDashboard() {
             </Suspense>
           )}
 
-          {/* Community Page */}
-          {activeNav === 'community' && (
+          {/* Community Page - Discussions */}
+          {activeNav === 'discussions' && (
             <Suspense fallback={<DashboardLoader />}>
-              <CommunityPlaceholder />
+              <DiscussionsPlaceholder />
+            </Suspense>
+          )}
+
+          {/* Community Page - Discover Projects */}
+          {activeNav === 'discover' && (
+            <Suspense fallback={<DashboardLoader />}>
+              <DiscoverProjectsPage />
             </Suspense>
           )}
         </div>
