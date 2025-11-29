@@ -203,7 +203,260 @@ export default function CommunityPage() {
         }
     }
 
-    // ... (rest of functions unchanged)
+    const handleJoinDiscussion = (discussionId: string) => {
+        if (joinedDiscussions.has(discussionId)) {
+            if (expandedDiscussionId === discussionId) {
+                setExpandedDiscussionId(null)
+            } else {
+                setExpandedDiscussionId(discussionId)
+                if (!comments[discussionId]) {
+                    loadComments(discussionId)
+                }
+            }
+        } else {
+            saveJoinedDiscussion(discussionId)
+            setExpandedDiscussionId(discussionId)
+            loadComments(discussionId)
+        }
+    }
+
+    const loadComments = async (discussionId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('discussion_comments')
+                .select('*')
+                .eq('discussion_id', discussionId)
+                .order('created_at', { ascending: true })
+
+            if (error) throw error
+            setComments(prev => ({ ...prev, [discussionId]: data || [] }))
+        } catch (error) {
+            console.error('Error loading comments:', error)
+        }
+    }
+
+    const handleAddComment = async (discussionId: string) => {
+        const content = newComment[discussionId]
+        if (!content?.trim()) return
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                alert('Please sign in to comment')
+                return
+            }
+
+            // Get user profile
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, avatar_url')
+                .eq('id', user.id)
+                .single()
+
+            const commentData = {
+                discussion_id: discussionId,
+                content: content.trim(),
+                author_id: user.id,
+                author_name: profile?.full_name || user.email?.split('@')[0] || 'Anonymous',
+                author_email: user.email || '',
+                author_avatar: profile?.avatar_url || null
+            }
+
+            const { data, error } = await supabase
+                .from('discussion_comments')
+                .insert([commentData])
+                .select()
+                .single()
+
+            if (error) throw error
+
+            setComments(prev => ({
+                ...prev,
+                [discussionId]: [...(prev[discussionId] || []), data]
+            }))
+            setNewComment(prev => ({ ...prev, [discussionId]: '' }))
+
+            // Update local discussion comment count
+            setDiscussions(prev => prev.map(d =>
+                d.id === discussionId
+                    ? { ...d, comments_count: (d.comments_count || 0) + 1 }
+                    : d
+            ))
+            setStats(prev => ({ ...prev, answers: prev.answers + 1 }))
+
+        } catch (error) {
+            console.error('Error adding comment:', error)
+            alert('Failed to post comment')
+        }
+    }
+
+    const handleCreateDiscussion = async () => {
+        if (!newDiscussion.title.trim() || !newDiscussion.content.trim()) {
+            alert('Please fill in all required fields')
+            return
+        }
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                alert('Please sign in to post')
+                return
+            }
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, avatar_url')
+                .eq('id', user.id)
+                .single()
+
+            const discussionData = {
+                title: newDiscussion.title.trim(),
+                content: newDiscussion.content.trim(),
+                category: newDiscussion.category,
+                tags: newDiscussion.tags.split(',').map(t => t.trim()).filter(Boolean),
+                author_id: user.id,
+                author_name: profile?.full_name || user.email?.split('@')[0] || 'Anonymous',
+                author_email: user.email || '',
+                author_avatar: profile?.avatar_url || null
+            }
+
+            const { data, error } = await supabase
+                .from('discussions')
+                .insert([discussionData])
+                .select()
+                .single()
+
+            if (error) throw error
+
+            setDiscussions(prev => [data, ...prev])
+            setShowNewDiscussionModal(false)
+            setNewDiscussion({ title: '', content: '', tags: '', category: 'Tech Help & Q&A' })
+            setStats(prev => ({ ...prev, topics: prev.topics + 1 }))
+
+        } catch (error) {
+            console.error('Error creating discussion:', error)
+            alert('Failed to create discussion')
+        }
+    }
+
+    const handleUpdateDiscussion = async () => {
+        if (!editingDiscussion) return
+
+        try {
+            const { error } = await supabase
+                .from('discussions')
+                .update({
+                    title: editingDiscussion.title,
+                    content: editingDiscussion.content,
+                    tags: editingDiscussion.tags,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', editingDiscussion.id)
+
+            if (error) throw error
+
+            setDiscussions(prev => prev.map(d =>
+                d.id === editingDiscussion.id ? editingDiscussion : d
+            ))
+            setEditingDiscussion(null)
+        } catch (error) {
+            console.error('Error updating discussion:', error)
+            alert('Failed to update discussion')
+        }
+    }
+
+    const handleDeleteDiscussion = async (id: string, authorId: string) => {
+        if (!confirm('Are you sure you want to delete this discussion?')) return
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user || user.id !== authorId) {
+                alert('You can only delete your own discussions')
+                return
+            }
+
+            const { error } = await supabase
+                .from('discussions')
+                .delete()
+                .eq('id', id)
+
+            if (error) throw error
+
+            setDiscussions(prev => prev.filter(d => d.id !== id))
+            setStats(prev => ({ ...prev, topics: Math.max(0, prev.topics - 1) }))
+        } catch (error) {
+            console.error('Error deleting discussion:', error)
+            alert('Failed to delete discussion')
+        }
+    }
+
+    const handleLikeDiscussion = async (id: string) => {
+        // Optimistic update
+        setDiscussions(prev => prev.map(d =>
+            d.id === id ? { ...d, likes_count: d.likes_count + 1 } : d
+        ))
+
+        try {
+            const { error } = await supabase.rpc('increment_discussion_likes', { row_id: id })
+            if (error) throw error
+        } catch (error) {
+            console.error('Error liking discussion:', error)
+            // Revert on error
+            setDiscussions(prev => prev.map(d =>
+                d.id === id ? { ...d, likes_count: d.likes_count - 1 } : d
+            ))
+        }
+    }
+
+    const handleBookmark = (id: string) => {
+        // Placeholder for bookmark functionality
+        alert('Bookmark saved!')
+    }
+
+    const getAvatarColor = (name: string = '') => {
+        const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500']
+        let hash = 0
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash)
+        }
+        return colors[Math.abs(hash) % colors.length]
+    }
+
+    const getTagStyle = (tag: string, idx: number) => {
+        const styles = [
+            'bg-blue-100 text-blue-700',
+            'bg-green-100 text-green-700',
+            'bg-purple-100 text-purple-700',
+            'bg-orange-100 text-orange-700',
+            'bg-pink-100 text-pink-700'
+        ]
+        return styles[idx % styles.length]
+    }
+
+    const getFilteredDiscussions = () => {
+        let filtered = [...discussions]
+
+        // Filter by category
+        if (activeCategory !== 'All Discussions') {
+            filtered = filtered.filter(d => d.category === activeCategory)
+        }
+
+        // Sort
+        switch (sortBy) {
+            case 'Most Recent':
+                filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                break
+            case 'Most Popular':
+                filtered.sort((a, b) => (b.likes_count + b.comments_count) - (a.likes_count + a.comments_count))
+                break
+            case 'Unanswered':
+                filtered = filtered.filter(d => d.comments_count === 0)
+                filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                break
+        }
+
+        return filtered
+    }
 
     const filteredDiscussions = getFilteredDiscussions()
 
