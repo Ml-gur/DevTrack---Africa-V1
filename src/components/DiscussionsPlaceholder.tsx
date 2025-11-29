@@ -699,7 +699,7 @@ export default function CommunityPage() {
                                                         </button>
                                                         <button
                                                             onClick={() => handleJoinDiscussion(discussion.id)}
-                                                            className="px-6 py-3 bg-orange-500 text-white rounded-lg text-base font-semibold hover:bg-orange-600 transition-all shadow-sm hover:shadow"
+                                                            className="px-6 py-3 bg-orange-600 text-white rounded-lg text-base font-semibold hover:bg-orange-700 transition-all shadow-sm hover:shadow"
                                                         >
                                                             {joinedDiscussions.has(discussion.id)
                                                                 ? (expandedDiscussionId === discussion.id ? 'Hide' : 'View Discussion')
@@ -723,7 +723,7 @@ export default function CommunityPage() {
                                                             />
                                                             <button
                                                                 onClick={() => handleAddComment(discussion.id)}
-                                                                className="mt-2 flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+                                                                className="mt-2 flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
                                                             >
                                                                 <Send className="w-4 h-4" />
                                                                 Post Comment
@@ -819,7 +819,7 @@ export default function CommunityPage() {
                             <div className="flex gap-3 pt-4">
                                 <button
                                     onClick={handleCreateDiscussion}
-                                    className="flex-1 bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600"
+                                    className="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700"
                                 >
                                     Post Discussion
                                 </button>
