@@ -462,51 +462,20 @@ export default function CommunityPage() {
     const filteredDiscussions = getFilteredDiscussions()
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
-            <section className="bg-white border-b border-gray-200 py-10">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="text-left max-w-2xl">
-                            <h2 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
-                                Join the <span className="text-orange-600">Conversation</span>
-                            </h2>
-                            <p className="text-gray-600 text-lg leading-relaxed font-medium">
-                                Share knowledge, ask questions, and connect with developers across Africa.
-                            </p>
-                        </div>
-
-                        <div className="flex gap-4">
-                            <div className="bg-orange-50 border border-orange-100 px-6 py-4 rounded-2xl text-center min-w-[110px] shadow-sm">
-                                <p className="text-3xl font-extrabold text-orange-600">{stats.members}</p>
-                                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mt-1">Members</p>
-                            </div>
-                            <div className="bg-blue-50 border border-blue-100 px-6 py-4 rounded-2xl text-center min-w-[110px] shadow-sm">
-                                <p className="text-3xl font-extrabold text-blue-600">{stats.topics}</p>
-                                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mt-1">Topics</p>
-                            </div>
-                            <div className="bg-green-50 border border-green-100 px-6 py-4 rounded-2xl text-center min-w-[110px] shadow-sm">
-                                <p className="text-3xl font-extrabold text-green-600">{stats.answers}</p>
-                                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mt-1">Answers</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <main className="max-w-7xl mx-auto px-6 py-8">
-                <div className="flex gap-8">
-                    <aside className="w-64 flex-shrink-0 hidden md:block">
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm sticky top-6 overflow-hidden">
-                            <div className="p-4 border-b border-gray-100 bg-gray-50">
-                                <h3 className="font-bold text-gray-900">Categories</h3>
-                            </div>
-                            <ul className="p-2 space-y-1">
+        <div className="min-h-screen bg-gray-50 font-sans p-6 md:p-8">
+            <main className="max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Sidebar */}
+                    <aside className="w-full md:w-64 flex-shrink-0">
+                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm sticky top-6 p-6">
+                            <h3 className="font-bold text-gray-900 text-lg mb-4">Discussion Categories</h3>
+                            <ul className="space-y-2">
                                 {categories.map(category => (
                                     <li key={category}>
                                         <button
                                             onClick={() => setActiveCategory(category)}
-                                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all font-semibold ${activeCategory === category
-                                                ? 'bg-orange-50 text-orange-700 border border-orange-100'
+                                            className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeCategory === category
+                                                ? 'bg-[#FF5722] text-white shadow-md'
                                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                                 }`}
                                         >
@@ -518,8 +487,10 @@ export default function CommunityPage() {
                         </div>
                     </aside>
 
+                    {/* Main Content */}
                     <div className="flex-1">
-                        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+                        {/* Header Filters & Action */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <div className="relative w-full sm:w-auto">
                                     <select
@@ -549,48 +520,7 @@ export default function CommunityPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setShowNotifications(!showNotifications)}
-                                        className="relative p-2.5 text-gray-600 hover:bg-white hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-gray-200"
-                                    >
-                                        <Bell className="w-5 h-5" />
-                                        {notifications.length > 0 && (
-                                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-                                        )}
-                                    </button>
-
-                                    {showNotifications && (
-                                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-                                            <div className="p-4 border-b border-gray-100 bg-gray-50">
-                                                <h3 className="font-bold text-gray-900">Notifications</h3>
-                                            </div>
-                                            <div className="max-h-96 overflow-y-auto">
-                                                {notifications.length === 0 ? (
-                                                    <div className="p-8 text-center text-gray-500 text-sm">No new notifications</div>
-                                                ) : (
-                                                    notifications.map(notif => (
-                                                        <div
-                                                            key={notif.id}
-                                                            className="p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
-                                                            onClick={() => {
-                                                                markNotificationAsRead(notif.id)
-                                                                handleJoinDiscussion(notif.discussion_id)
-                                                                setShowNotifications(false)
-                                                            }}
-                                                        >
-                                                            <p className="text-sm font-semibold text-gray-900">{notif.discussion_title}</p>
-                                                            <p className="text-xs text-gray-600 mt-1 font-medium">{notif.commenter_name} commented</p>
-                                                            <p className="text-xs text-gray-400 mt-1">{new Date(notif.created_at).toLocaleString()}</p>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
+                            <div className="w-full sm:w-auto flex justify-end">
                                 <button
                                     onClick={() => setShowNewDiscussionModal(true)}
                                     className="flex items-center gap-2 bg-[#FF5722] hover:bg-[#F4511E] text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
@@ -620,7 +550,7 @@ export default function CommunityPage() {
                                 {filteredDiscussions.map(discussion => (
                                     <div
                                         key={discussion.id}
-                                        className="bg-white rounded-xl p-6 hover:shadow-lg transition-all border border-gray-200 group"
+                                        className="bg-white rounded-2xl p-6 hover:shadow-lg transition-all border border-gray-200 group mb-4"
                                     >
                                         <div className="flex gap-4">
                                             <div className={`w-12 h-12 ${getAvatarColor(discussion.author_name || discussion.author_email)} rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
@@ -629,116 +559,88 @@ export default function CommunityPage() {
                                             </div>
 
                                             <div className="flex-1">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex-1">
-                                                        <h3 className="text-lg font-semibold text-gray-900 hover:text-orange-500 transition-colors cursor-pointer mb-1">
-                                                            {discussion.title} {discussion.is_pinned && '📌'}
+                                                <div className="mb-2">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <h3 className="text-lg font-bold text-gray-900 hover:text-[#FF5722] transition-colors cursor-pointer">
+                                                            {discussion.title}
                                                         </h3>
-                                                        <p className="text-sm text-gray-500">
-                                                            <span className="text-gray-700">{discussion.author_name || 'Anonymous'}</span>
-                                                            <span className="mx-2">•</span>
-                                                            {new Date(discussion.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                            <span className="mx-2">•</span>
-                                                            <span className="text-orange-500">
-                                                                Last reply: {new Date(discussion.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                            </span>
-                                                        </p>
+                                                        {discussion.is_pinned && <span className="text-red-500">📌</span>}
                                                     </div>
-
-                                                    {currentUserId && discussion.author_id === currentUserId && (
-                                                        <div className="flex gap-1">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setEditingDiscussion(discussion)
-                                                                }}
-                                                                className="text-gray-400 hover:text-blue-600 p-2 rounded hover:bg-blue-50"
-                                                                title="Edit"
-                                                            >
-                                                                <Edit className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    handleDeleteDiscussion(discussion.id, discussion.author_id)
-                                                                }}
-                                                                className="text-gray-400 hover:text-red-600 p-2 rounded hover:bg-red-50"
-                                                                title="Delete"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                    <p className="text-sm text-gray-500 font-medium">
+                                                        <span className="text-gray-600">{discussion.author_name || 'Anonymous'}</span>
+                                                        <span className="mx-2">•</span>
+                                                        {new Date(discussion.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        <span className="mx-2">•</span>
+                                                        <span className="text-[#FF5722]">
+                                                            Last reply: {new Date(discussion.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        </span>
+                                                    </p>
                                                 </div>
 
-                                                <p className="text-gray-700 text-sm leading-relaxed mb-4">{discussion.content}</p>
+                                                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">{discussion.content}</p>
 
                                                 {discussion.tags && discussion.tags.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        {discussion.tags.map((tag, idx) => (
-                                                            <span key={idx} className={`px-3 py-1 rounded text-xs font-medium ${getTagStyle(tag, idx)}`}>
-                                                                {tag}
-                                                            </span>
-                                                        ))}
+                                                    <div className="flex flex-wrap gap-2 mb-6">
+                                                        {discussion.tags.map((tag, idx) => {
+                                                            let tagStyle = 'bg-gray-100 text-gray-700'
+                                                            if (tag.toLowerCase().includes('react')) tagStyle = 'bg-blue-100 text-blue-700'
+                                                            if (tag.toLowerCase().includes('performance')) tagStyle = 'bg-orange-100 text-orange-700'
+                                                            if (tag.toLowerCase().includes('best practices')) tagStyle = 'bg-gray-100 text-gray-700'
+
+                                                            return (
+                                                                <span key={idx} className={`px-3 py-1 rounded-md text-xs font-semibold ${tagStyle}`}>
+                                                                    {tag}
+                                                                </span>
+                                                            )
+                                                        })}
                                                     </div>
                                                 )}
 
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-4 text-gray-500 text-sm">
-                                                        <div className="flex items-center gap-1.5">
+                                                <div className="flex items-center justify-between pt-2">
+                                                    <div className="flex items-center gap-6 text-gray-500 text-sm font-medium">
+                                                        <div className="flex items-center gap-2">
                                                             <MessageSquare className="w-4 h-4" />
-                                                            <span className="font-medium">{discussion.comments_count}</span>
-                                                            <span>replies</span>
+                                                            <span>{discussion.comments_count} replies</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1.5">
+                                                        <div className="flex items-center gap-2">
                                                             <Eye className="w-4 h-4" />
-                                                            <span className="font-medium">{discussion.views_count}</span>
-                                                            <span>views</span>
+                                                            <span>{discussion.views_count} views</span>
                                                         </div>
                                                         <button
                                                             onClick={() => handleLikeDiscussion(discussion.id)}
-                                                            className="flex items-center gap-1.5 hover:text-orange-500 transition"
+                                                            className="flex items-center gap-2 hover:text-[#FF5722] transition"
                                                         >
                                                             <ThumbsUp className="w-4 h-4" />
-                                                            <span className="font-medium">{discussion.likes_count}</span>
+                                                            <span>{discussion.likes_count}</span>
                                                         </button>
                                                     </div>
 
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleBookmark(discussion.id)}
-                                                            className="text-gray-400 hover:text-orange-500 p-1.5"
-                                                            title="Bookmark"
-                                                        >
-                                                            <Bookmark className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleJoinDiscussion(discussion.id)}
-                                                            className="px-6 py-3 bg-[#FF5722] text-white rounded-lg text-base font-semibold hover:bg-[#F4511E] transition-all shadow-sm hover:shadow"
-                                                        >
-                                                            {joinedDiscussions.has(discussion.id)
-                                                                ? (expandedDiscussionId === discussion.id ? 'Hide' : 'View Discussion')
-                                                                : 'Join Discussion'
-                                                            }
-                                                        </button>
-                                                    </div>
+                                                    <button
+                                                        onClick={() => handleJoinDiscussion(discussion.id)}
+                                                        className="px-6 py-2.5 bg-[#FF5722] text-white rounded-lg text-sm font-bold hover:bg-[#F4511E] transition-all shadow-sm hover:shadow-md"
+                                                    >
+                                                        {joinedDiscussions.has(discussion.id)
+                                                            ? (expandedDiscussionId === discussion.id ? 'Hide Discussion' : 'View Discussion')
+                                                            : 'Join Discussion'
+                                                        }
+                                                    </button>
                                                 </div>
 
                                                 {expandedDiscussionId === discussion.id && (
-                                                    <div className="mt-6 pt-6 border-t">
-                                                        <h5 className="font-semibold mb-4">Comments ({comments[discussion.id]?.length || 0})</h5>
+                                                    <div className="mt-6 pt-6 border-t border-gray-100">
+                                                        <h5 className="font-bold text-gray-900 mb-4">Comments ({comments[discussion.id]?.length || 0})</h5>
 
                                                         <div className="mb-6">
                                                             <textarea
                                                                 value={newComment[discussion.id] || ''}
                                                                 onChange={e => setNewComment({ ...newComment, [discussion.id]: e.target.value })}
                                                                 placeholder="Write a comment..."
-                                                                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none resize-none"
+                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#FF5722]/20 focus:border-[#FF5722] focus:outline-none resize-none transition-all"
                                                                 rows={3}
                                                             />
                                                             <button
                                                                 onClick={() => handleAddComment(discussion.id)}
-                                                                className="mt-2 flex items-center gap-2 bg-[#FF5722] text-white px-4 py-2 rounded-lg hover:bg-[#F4511E]"
+                                                                className="mt-3 flex items-center gap-2 bg-[#FF5722] text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[#F4511E] transition-all"
                                                             >
                                                                 <Send className="w-4 h-4" />
                                                                 Post Comment
@@ -747,17 +649,17 @@ export default function CommunityPage() {
 
                                                         <div className="space-y-4">
                                                             {comments[discussion.id]?.map(comment => (
-                                                                <div key={comment.id} className="flex gap-3 p-4 bg-gray-50 rounded-lg">
-                                                                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                                                <div key={comment.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-sm">
                                                                         {(comment.author_name?.[0] || comment.author_email?.[0] || '?').toUpperCase()}
                                                                     </div>
                                                                     <div className="flex-1">
                                                                         <div className="flex items-center gap-2 mb-1">
-                                                                            <span className="font-semibold text-sm">{comment.author_name || 'Anonymous'}</span>
-                                                                            <span className="text-xs text-gray-500">{new Date(comment.created_at).toLocaleDateString()}</span>
+                                                                            <span className="font-bold text-gray-900 text-sm">{comment.author_name || 'Anonymous'}</span>
+                                                                            <span className="text-xs text-gray-500">• {new Date(comment.created_at).toLocaleDateString()}</span>
                                                                             {comment.is_edited && <span className="text-xs text-gray-400">(edited)</span>}
                                                                         </div>
-                                                                        <p className="text-gray-700 text-sm">{comment.content}</p>
+                                                                        <p className="text-gray-700 text-sm leading-relaxed">{comment.content}</p>
                                                                     </div>
                                                                 </div>
                                                             ))}
