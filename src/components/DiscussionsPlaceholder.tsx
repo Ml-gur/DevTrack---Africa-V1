@@ -48,6 +48,7 @@ export default function CommunityPage() {
     const [loading, setLoading] = useState(true)
     const [activeCategory, setActiveCategory] = useState('All Discussions')
     const [sortBy, setSortBy] = useState('Most Recent')
+    const [timeFilter, setTimeFilter] = useState('All Time')
     const [showNewDiscussionModal, setShowNewDiscussionModal] = useState(false)
     const [expandedDiscussionId, setExpandedDiscussionId] = useState<string | null>(null)
     const [joinedDiscussions, setJoinedDiscussions] = useState<Set<string>>(new Set())
@@ -524,11 +525,25 @@ export default function CommunityPage() {
                                     <select
                                         value={sortBy}
                                         onChange={e => setSortBy(e.target.value)}
-                                        className="w-full sm:w-auto appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm cursor-pointer hover:border-gray-400 transition-colors"
+                                        className="w-full sm:w-auto appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 shadow-sm cursor-pointer hover:border-gray-300 transition-colors"
                                     >
                                         <option>Most Recent</option>
                                         <option>Most Popular</option>
                                         <option>Unanswered</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                </div>
+
+                                <div className="relative w-full sm:w-auto">
+                                    <select
+                                        value={timeFilter}
+                                        onChange={e => setTimeFilter(e.target.value)}
+                                        className="w-full sm:w-auto appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 shadow-sm cursor-pointer hover:border-gray-300 transition-colors"
+                                    >
+                                        <option>All Time</option>
+                                        <option>This Week</option>
+                                        <option>This Month</option>
+                                        <option>This Year</option>
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 </div>
@@ -578,7 +593,7 @@ export default function CommunityPage() {
 
                                 <button
                                     onClick={() => setShowNewDiscussionModal(true)}
-                                    className="flex items-center gap-2 bg-orange-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-orange-700 transition-all shadow-sm hover:shadow-md active:scale-95"
+                                    className="flex items-center gap-2 bg-[#FF5722] hover:bg-[#F4511E] text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
                                 >
                                     <Plus className="w-5 h-5" />
                                     Start Discussion
@@ -595,7 +610,7 @@ export default function CommunityPage() {
                                 <p className="text-gray-500 mb-4 font-medium">No discussions yet. Be the first to start one!</p>
                                 <button
                                     onClick={() => setShowNewDiscussionModal(true)}
-                                    className="bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-700 transition-all shadow-sm"
+                                    className="bg-[#FF5722] text-white px-6 py-2.5 rounded-lg font-bold hover:bg-[#F4511E] transition-all shadow-sm"
                                 >
                                     Start First Discussion
                                 </button>
@@ -699,7 +714,7 @@ export default function CommunityPage() {
                                                         </button>
                                                         <button
                                                             onClick={() => handleJoinDiscussion(discussion.id)}
-                                                            className="px-6 py-3 bg-orange-600 text-white rounded-lg text-base font-semibold hover:bg-orange-700 transition-all shadow-sm hover:shadow"
+                                                            className="px-6 py-3 bg-[#FF5722] text-white rounded-lg text-base font-semibold hover:bg-[#F4511E] transition-all shadow-sm hover:shadow"
                                                         >
                                                             {joinedDiscussions.has(discussion.id)
                                                                 ? (expandedDiscussionId === discussion.id ? 'Hide' : 'View Discussion')
@@ -723,7 +738,7 @@ export default function CommunityPage() {
                                                             />
                                                             <button
                                                                 onClick={() => handleAddComment(discussion.id)}
-                                                                className="mt-2 flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+                                                                className="mt-2 flex items-center gap-2 bg-[#FF5722] text-white px-4 py-2 rounded-lg hover:bg-[#F4511E]"
                                                             >
                                                                 <Send className="w-4 h-4" />
                                                                 Post Comment
@@ -819,7 +834,7 @@ export default function CommunityPage() {
                             <div className="flex gap-3 pt-4">
                                 <button
                                     onClick={handleCreateDiscussion}
-                                    className="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700"
+                                    className="flex-1 bg-[#FF5722] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#F4511E]"
                                 >
                                     Post Discussion
                                 </button>
