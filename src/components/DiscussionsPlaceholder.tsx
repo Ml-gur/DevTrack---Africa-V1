@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, Eye, Plus, X, Bookmark, ChevronDown, Send, Edit, Trash2, ThumbsUp, Bell } from 'lucide-react'
+import { MessageSquare, Eye, Plus, X, Bookmark, ChevronDown, Send, Edit, Trash2, ThumbsUp, Bell, Pin } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 
 type Comment = {
@@ -434,6 +434,29 @@ export default function CommunityPage() {
         return styles[idx % styles.length]
     }
 
+    const formatTimeAgo = (dateString: string) => {
+        const date = new Date(dateString)
+        const now = new Date()
+        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+        if (diffInSeconds < 60) return 'just now'
+
+        const diffInMinutes = Math.floor(diffInSeconds / 60)
+        if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+
+        const diffInHours = Math.floor(diffInMinutes / 60)
+        if (diffInHours < 24) return `${diffInHours}h ago`
+
+        const diffInDays = Math.floor(diffInHours / 24)
+        if (diffInDays < 30) return `${diffInDays}d ago`
+
+        const diffInMonths = Math.floor(diffInDays / 30)
+        if (diffInMonths < 12) return `${diffInMonths}mo ago`
+
+        const diffInYears = Math.floor(diffInDays / 365)
+        return `${diffInYears}y ago`
+    }
+
     const getFilteredDiscussions = () => {
         let filtered = [...discussions]
 
@@ -561,18 +584,18 @@ export default function CommunityPage() {
                                             <div className="flex-1">
                                                 <div className="mb-2">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="text-lg font-bold text-gray-900 hover:text-[#FF5722] transition-colors cursor-pointer">
+                                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#FF5722] hover:text-[#FF5722] transition-colors cursor-pointer">
                                                             {discussion.title}
                                                         </h3>
-                                                        {discussion.is_pinned && <span className="text-red-500">📌</span>}
+                                                        {discussion.is_pinned && <Pin className="w-4 h-4 text-red-500 fill-current rotate-45" />}
                                                     </div>
-                                                    <p className="text-sm text-gray-500 font-medium">
+                                                    <p className="text-sm text-gray-500 font-medium flex items-center flex-wrap gap-2">
                                                         <span className="text-gray-600">{discussion.author_name || 'Anonymous'}</span>
-                                                        <span className="mx-2">•</span>
-                                                        {new Date(discussion.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                        <span className="mx-2">•</span>
+                                                        <span className="text-gray-300">•</span>
+                                                        <span>{formatTimeAgo(discussion.created_at)}</span>
+                                                        <span className="text-gray-300">•</span>
                                                         <span className="text-[#FF5722]">
-                                                            Last reply: {new Date(discussion.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                            Last reply: {formatTimeAgo(discussion.updated_at)}
                                                         </span>
                                                     </p>
                                                 </div>
@@ -656,7 +679,7 @@ export default function CommunityPage() {
                                                                     <div className="flex-1">
                                                                         <div className="flex items-center gap-2 mb-1">
                                                                             <span className="font-bold text-gray-900 text-sm">{comment.author_name || 'Anonymous'}</span>
-                                                                            <span className="text-xs text-gray-500">• {new Date(comment.created_at).toLocaleDateString()}</span>
+                                                                            <span className="text-xs text-gray-500">• {formatTimeAgo(comment.created_at)}</span>
                                                                             {comment.is_edited && <span className="text-xs text-gray-400">(edited)</span>}
                                                                         </div>
                                                                         <p className="text-gray-700 text-sm leading-relaxed">{comment.content}</p>
