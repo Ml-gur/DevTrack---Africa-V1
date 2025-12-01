@@ -55,8 +55,6 @@ const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const ProjectCreationHub = lazy(() => import('./ProjectCreationHub'));
 const EnhancedAnalyticsDashboard = lazy(() => import('./EnhancedAnalyticsDashboard'));
 const ProfileViewer = lazy(() => import('./ProfileViewer'));
-const DiscussionsPlaceholder = lazy(() => import('./DiscussionsPlaceholder'));
-const DiscoverProjectsPage = lazy(() => import('./DiscoverProjectsPage'));
 
 export default function StreamlinedDashboard() {
   const { user, profile, signOut } = useAuth();
@@ -76,15 +74,6 @@ export default function StreamlinedDashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [activeNav, setActiveNav] = useState<string>('overview'); // Changed from currentTab
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [communityExpanded, setCommunityExpanded] = useState(false);
-
-  // Auto-expand community menu if active nav is a child
-  useEffect(() => {
-    if (activeNav === 'discussions' || activeNav === 'discover') {
-      setCommunityExpanded(true);
-    }
-  }, [activeNav]);
-
 
   // Load data
   useEffect(() => {
@@ -471,8 +460,6 @@ export default function StreamlinedDashboard() {
                 {activeNav === 'overview' && 'Dashboard'}
                 {activeNav === 'projects' && 'Projects'}
                 {activeNav === 'analytics' && 'Analytics'}
-                {activeNav === 'discussions' && 'Community Discussions'}
-                {activeNav === 'discover' && 'Discover Projects'}
               </h2>
               <button
                 onClick={() => setSidebarCollapsed(true)}
@@ -530,48 +517,7 @@ export default function StreamlinedDashboard() {
               )}
             </button>
 
-            {/* Community Section */}
-            <div>
-              <button
-                onClick={() => setCommunityExpanded(!communityExpanded)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'discussions' || activeNav === 'discover'
-                  ? 'text-blue-700 font-semibold'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-              >
-                <Users className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'discussions' || activeNav === 'discover' ? 'scale-110' : 'group-hover:scale-105'}`} />
-                <span className="flex-1 text-left text-sm">Community</span>
-                {communityExpanded ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </button>
 
-              {/* Community Sub-menu */}
-              {communityExpanded && (
-                <div className="ml-4 pl-4 border-l border-gray-200 space-y-1 mt-1">
-                  <button
-                    onClick={() => setActiveNav('discussions')}
-                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm ${activeNav === 'discussions'
-                      ? 'bg-blue-50 text-blue-700 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
-                  >
-                    <span>Discussions</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveNav('discover')}
-                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm ${activeNav === 'discover'
-                      ? 'bg-blue-50 text-blue-700 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
-                  >
-                    <span>Discover Amazing Projects</span>
-                  </button>
-                </div>
-              )}
-            </div>
 
             <button
               onClick={() => setActiveNav('analytics')}
@@ -775,23 +721,7 @@ export default function StreamlinedDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card
-                  className="group hover:border-purple-400 transition-all cursor-pointer shadow-sm hover:shadow-lg border-gray-200"
-                  onClick={() => setActiveNav('discussions')}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 transition-colors shadow-sm">
-                        <Users className="w-7 h-7 text-purple-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-700 transition-colors">Community</h3>
-                        <p className="text-sm font-medium text-gray-500">Connect & collaborate</p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-gray-300 ml-auto group-hover:text-purple-500 transition-colors" />
-                    </div>
-                  </CardContent>
-                </Card>
+
               </div>
 
               {/* Recent Projects */}
@@ -1003,19 +933,7 @@ export default function StreamlinedDashboard() {
             </Suspense>
           )}
 
-          {/* Community Page - Discussions */}
-          {activeNav === 'discussions' && (
-            <Suspense fallback={<DashboardLoader />}>
-              <DiscussionsPlaceholder />
-            </Suspense>
-          )}
 
-          {/* Community Page - Discover Projects */}
-          {activeNav === 'discover' && (
-            <Suspense fallback={<DashboardLoader />}>
-              <DiscoverProjectsPage />
-            </Suspense>
-          )}
         </div>
       </main>
 

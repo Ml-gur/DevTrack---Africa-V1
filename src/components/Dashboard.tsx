@@ -18,8 +18,6 @@ import MessagingInterface from './MessagingInterface';
 import NotificationCenter from './NotificationCenter';
 import TestingDashboard from './TestingDashboard';
 import ConnectionStatus from './ConnectionStatus';
-import CommunityPage from './DiscussionsPlaceholder';
-import DiscoverProjectsPage from './DiscoverProjectsPage';
 import { supabase, getOfflineMode } from '../utils/supabase/client';
 import { connectionManager, ConnectionStatus as IConnectionStatus } from '../utils/connection-manager';
 import {
@@ -46,9 +44,7 @@ type DashboardView =
   | 'donezo-dashboard'
   | 'feed'
   | 'messaging'
-  | 'testing'
-  | 'community-discussions'
-  | 'community-discover';
+  | 'testing';
 
 export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, databaseConnected }: DashboardProps) {
   const [currentView, setCurrentView] = useState<DashboardView>('projects');
@@ -61,11 +57,6 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<IConnectionStatus>(connectionManager.getStatus());
-  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({ community: true });
-
-  const toggleMenuSection = (sectionId: string) => {
-    setExpandedMenus((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
-  };
 
   useEffect(() => {
     if (user?.id) {
@@ -325,20 +316,10 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
   const mainMenuItems = [
     { id: 'donezo-dashboard', label: 'Overview', icon: BarChart3 },
     { id: 'projects', label: 'Projects', icon: FolderOpen, badge: projects.length },
-    {
-      id: 'community',
-      label: 'Community',
-      icon: Users,
-      children: [
-        { id: 'community-discussions', label: 'Discussions' },
-        { id: 'community-discover', label: 'Discover Amazing Projects' }
-      ]
-    },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 }
   ];
 
   const secondaryMenuItems = [
-    { id: 'feed', label: 'Community Feed', icon: Users },
     { id: 'messaging', label: 'Messages', icon: MessageCircle, badge: unreadMessageCount > 0 ? unreadMessageCount : undefined },
     { id: 'testing', label: 'Testing', icon: TestTube }
   ];
@@ -365,9 +346,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
       <nav className="space-y-1 p-2">
         <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Main Menu</p>
         {mainMenuItems.map((item) => {
-          const isActive =
-            currentView === (item.id as DashboardView) ||
-            item.children?.some((child) => child.id === currentView);
+          const isActive = currentView === (item.id as DashboardView);
 
           return (
             <div key={item.id}>
@@ -375,45 +354,20 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
                 variant={isActive ? 'secondary' : 'ghost'}
                 className="w-full justify-between"
                 onClick={() => {
-                  if (item.children) {
-                    toggleMenuSection(item.id);
-                  } else {
-                    setCurrentView(item.id as DashboardView);
-                    setIsMobileMenuOpen(false);
-                  }
+                  setCurrentView(item.id as DashboardView);
+                  setIsMobileMenuOpen(false);
                 }}
               >
                 <div className="flex items-center space-x-3">
                   <item.icon className="h-5 w-5" />
                   <span>{item.label}</span>
                 </div>
-                {item.children ? (
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${expandedMenus[item.id] ? 'rotate-180' : ''}`}
-                  />
-                ) : item.badge !== undefined && item.badge > 0 ? (
+                {item.badge !== undefined && item.badge > 0 && (
                   <Badge variant="secondary" className="text-xs">
                     {item.badge > 99 ? '99+' : item.badge}
                   </Badge>
-                ) : null}
+                )}
               </Button>
-              {item.children && expandedMenus[item.id] && (
-                <div className="mt-1 space-y-1 pl-8">
-                  {item.children.map((child) => (
-                    <Button
-                      key={child.id}
-                      variant={currentView === child.id ? 'secondary' : 'ghost'}
-                      className="w-full justify-start text-sm"
-                      onClick={() => {
-                        setCurrentView(child.id as DashboardView);
-                        setIsMobileMenuOpen(false);
-                      }}
-                    >
-                      {child.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
             </div>
           );
         })}
@@ -495,13 +449,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
           />
         );
 
-      case 'feed':
-        return (
-          <ProgressFeed
-            currentUser={user}
-            onBack={() => setCurrentView('projects')}
-          />
-        );
+
 
       case 'messaging':
         return (
@@ -514,12 +462,6 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
 
       case 'testing':
         return <TestingDashboard />;
-
-      case 'community-discussions':
-        return <CommunityPage currentUser={profile || user} />;
-
-      case 'community-discover':
-        return <DiscoverProjectsPage />;
 
       case 'projects':
       default:
