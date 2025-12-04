@@ -15,6 +15,7 @@ export interface Project {
   liveUrl?: string
   techStack: string[]
   isPublic: boolean
+  images?: string[]
   created_at: string
   updated_at: string
 }
@@ -84,6 +85,7 @@ function mapProjectFromDB(dbProject: any): Project {
     liveUrl: dbProject.live_url,
     techStack: dbProject.tech_stack || [],
     isPublic: dbProject.is_public || false,
+    images: dbProject.images || [],
     created_at: dbProject.created_at,
     updated_at: dbProject.updated_at
   }
@@ -141,6 +143,7 @@ function mapProjectToDB(project: Partial<Project>): any {
   if (project.liveUrl !== undefined) dbProject.live_url = project.liveUrl
   if (project.techStack !== undefined) dbProject.tech_stack = project.techStack
   if (project.isPublic !== undefined) dbProject.is_public = project.isPublic
+  if (project.images !== undefined) dbProject.images = project.images
   return dbProject
 }
 

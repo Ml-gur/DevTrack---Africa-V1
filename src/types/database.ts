@@ -163,6 +163,7 @@ export interface Project {
   is_public?: boolean
   isPublic?: boolean
   due_date?: string | null
+  images?: string[]
   created_at?: string
   updated_at?: string
 }
@@ -180,6 +181,7 @@ export interface ProjectInsert {
   live_url?: string | null
   is_public?: boolean
   due_date?: string | null
+  images?: string[]
 }
 
 export interface ProjectUpdate {
@@ -194,6 +196,7 @@ export interface ProjectUpdate {
   live_url?: string | null
   is_public?: boolean
   due_date?: string | null
+  images?: string[]
 }
 
 export interface ProjectCollaborator {

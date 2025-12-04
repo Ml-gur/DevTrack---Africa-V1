@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, FolderOpen, BarChart3, Users, MessageCircle, Bell, Search, Menu, X, TestTube, Wifi } from 'lucide-react';
+import { Plus, FolderOpen, BarChart3, Users, MessageCircle, Bell, Search, Menu, X, TestTube, Wifi, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Avatar } from './ui/avatar';
@@ -18,13 +18,15 @@ import MessagingInterface from './MessagingInterface';
 import NotificationCenter from './NotificationCenter';
 import TestingDashboard from './TestingDashboard';
 import ConnectionStatus from './ConnectionStatus';
+import CommunityPage from './DiscussionsPlaceholder';
+import DiscoverProjectsPage from './DiscoverProjectsPage';
 import { supabase, getOfflineMode } from '../utils/supabase/client';
 import { connectionManager, ConnectionStatus as IConnectionStatus } from '../utils/connection-manager';
-import { 
-  getUserProjects, 
-  createProject, 
-  getAllPosts, 
-  UserProfile 
+import {
+  getUserProjects,
+  createProject,
+  getAllPosts,
+  UserProfile
 } from '../utils/database-service';
 import { Project } from '../types/project';
 import { Post } from '../types/social';
@@ -37,7 +39,16 @@ interface DashboardProps {
   databaseConnected?: boolean | null;
 }
 
-type DashboardView = 'projects' | 'project-details' | 'analytics' | 'donezo-dashboard' | 'feed' | 'messaging' | 'testing';
+type DashboardView =
+  | 'projects'
+  | 'project-details'
+  | 'analytics'
+  | 'donezo-dashboard'
+  | 'feed'
+  | 'messaging'
+  | 'testing'
+  | 'community-discussions'
+  | 'community-discover';
 
 export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, databaseConnected }: DashboardProps) {
   const [currentView, setCurrentView] = useState<DashboardView>('projects');
@@ -50,6 +61,11 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<IConnectionStatus>(connectionManager.getStatus());
+  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({ community: true });
+
+  const toggleMenuSection = (sectionId: string) => {
+    setExpandedMenus((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  };
 
   useEffect(() => {
     if (user?.id) {
@@ -57,9 +73,9 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
       const handleConnectionChange = (status: IConnectionStatus) => {
         setConnectionStatus(status);
       };
-      
+
       connectionManager.addListener(handleConnectionChange);
-      
+
       // Load dashboard data
       loadDashboardData();
       loadUnreadMessageCount();
@@ -74,7 +90,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       if (!connectionStatus.online) {
         console.log('📱 Offline mode - using cached/demo data');
         setProjects([]);
@@ -82,7 +98,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
         setLoading(false);
         return;
       }
-      
+
       // Load projects using database service
       try {
         const projectsResult = await getUserProjects(user.id);
@@ -149,7 +165,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
     try {
       if (!connectionStatus.supabaseReachable) {
         console.log('📡 Realtime subscription skipped - Supabase not reachable');
-        return () => {};
+        return () => { };
       }
 
       const subscription = supabase
@@ -175,7 +191,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
       return () => subscription.unsubscribe();
     } catch (error) {
       console.log('📡 Message subscription error (non-critical):', error);
-      return () => {};
+      return () => { };
     }
   };
 
@@ -201,42 +217,42 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
 
       if (result.error) {
         console.error('❌ Create project error:', result.error);
-        
+
         // Provide helpful error messages based on error type
         if (result.error.message?.includes('offline') || result.error.code === 'OFFLINE') {
-          return { 
-            success: false, 
-            error: 'Cannot create projects while offline. Please check your connection and try again.' 
+          return {
+            success: false,
+            error: 'Cannot create projects while offline. Please check your connection and try again.'
           };
         }
-        
+
         if (result.error.message?.includes('Network') || result.error.code === 'NETWORK_ERROR') {
-          return { 
-            success: false, 
-            error: 'Network connection failed. Please check your connection and try again.' 
+          return {
+            success: false,
+            error: 'Network connection failed. Please check your connection and try again.'
           };
         }
-        
+
         if (result.error.message?.includes('relation') || result.error.code === 'DB_NOT_AVAILABLE') {
-          return { 
-            success: false, 
+          return {
+            success: false,
             error: 'Database setup required. Please set up the database to create projects.',
             requiresSetup: true
           };
         }
-        
+
         // Handle column missing errors gracefully
         if (result.error.message?.includes('column') || result.error.message?.includes('does not exist')) {
-          return { 
-            success: false, 
+          return {
+            success: false,
             error: 'Some project features require database updates. The project may still be created with basic information.',
             isWarning: true
           };
         }
-        
-        return { 
-          success: false, 
-          error: result.error.message || 'Failed to create project. Please try again.' 
+
+        return {
+          success: false,
+          error: result.error.message || 'Failed to create project. Please try again.'
         };
       }
 
@@ -244,25 +260,25 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
         // Database service now returns properly formatted Project objects
         setProjects(prev => [result.data, ...prev]);
         setShowProjectForm(false);
-        
+
         // Refresh project list if database is available
         if (connectionStatus.databaseAvailable) {
           setTimeout(() => loadDashboardData(), 500); // Small delay to allow database to sync
         }
-        
-        const message = result.isTemporary 
-          ? 'Project created locally! It will sync when the database is available.' 
+
+        const message = result.isTemporary
+          ? 'Project created locally! It will sync when the database is available.'
           : 'Project created successfully!';
-          
+
         return { success: true, message };
       }
-      
+
       return { success: false, error: 'Project creation failed - no data returned' };
     } catch (error) {
       console.error('❌ Error saving project:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to save project' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save project'
       };
     }
   };
@@ -273,7 +289,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
   };
 
   const handleProjectUpdate = (updatedProject: Project) => {
-    setProjects(prev => 
+    setProjects(prev =>
       prev.map(p => p.id === updatedProject.id ? updatedProject : p)
     );
     setSelectedProject(updatedProject);
@@ -306,11 +322,23 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
     project.techStack?.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const sidebarItems = [
-    { id: 'donezo-dashboard', label: 'Dashboard', icon: BarChart3 },
+  const mainMenuItems = [
+    { id: 'donezo-dashboard', label: 'Overview', icon: BarChart3 },
     { id: 'projects', label: 'Projects', icon: FolderOpen, badge: projects.length },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'feed', label: 'Community', icon: Users },
+    {
+      id: 'community',
+      label: 'Community',
+      icon: Users,
+      children: [
+        { id: 'community-discussions', label: 'Discussions' },
+        { id: 'community-discover', label: 'Discover Amazing Projects' }
+      ]
+    },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+  ];
+
+  const secondaryMenuItems = [
+    { id: 'feed', label: 'Community Feed', icon: Users },
     { id: 'messaging', label: 'Messages', icon: MessageCircle, badge: unreadMessageCount > 0 ? unreadMessageCount : undefined },
     { id: 'testing', label: 'Testing', icon: TestTube }
   ];
@@ -335,7 +363,64 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
       <Separator />
 
       <nav className="space-y-1 p-2">
-        {sidebarItems.map((item) => (
+        <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Main Menu</p>
+        {mainMenuItems.map((item) => {
+          const isActive =
+            currentView === (item.id as DashboardView) ||
+            item.children?.some((child) => child.id === currentView);
+
+          return (
+            <div key={item.id}>
+              <Button
+                variant={isActive ? 'secondary' : 'ghost'}
+                className="w-full justify-between"
+                onClick={() => {
+                  if (item.children) {
+                    toggleMenuSection(item.id);
+                  } else {
+                    setCurrentView(item.id as DashboardView);
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
+              >
+                <div className="flex items-center space-x-3">
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </div>
+                {item.children ? (
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${expandedMenus[item.id] ? 'rotate-180' : ''}`}
+                  />
+                ) : item.badge !== undefined && item.badge > 0 ? (
+                  <Badge variant="secondary" className="text-xs">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </Badge>
+                ) : null}
+              </Button>
+              {item.children && expandedMenus[item.id] && (
+                <div className="mt-1 space-y-1 pl-8">
+                  {item.children.map((child) => (
+                    <Button
+                      key={child.id}
+                      variant={currentView === child.id ? 'secondary' : 'ghost'}
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setCurrentView(child.id as DashboardView);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      {child.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        <Separator className="my-4" />
+        <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">More</p>
+        {secondaryMenuItems.map((item) => (
           <Button
             key={item.id}
             variant={currentView === item.id ? 'secondary' : 'ghost'}
@@ -365,11 +450,11 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
         <div className="px-2">
           <ConnectionStatus />
         </div>
-        
+
         <Button variant="ghost" className="w-full justify-start" onClick={onLogout}>
           <span>Sign Out</span>
         </Button>
-        
+
         {!connectionStatus.databaseAvailable && onNavigateToSetup && (
           <Button variant="outline" className="w-full justify-start" onClick={onNavigateToSetup}>
             <span>Setup Database</span>
@@ -406,7 +491,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
           <AnalyticsDashboard
             userId={user.id}
             timeRange="week"
-            onTimeRangeChange={() => {}}
+            onTimeRangeChange={() => { }}
           />
         );
 
@@ -430,6 +515,12 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
       case 'testing':
         return <TestingDashboard />;
 
+      case 'community-discussions':
+        return <CommunityPage currentUser={profile || user} />;
+
+      case 'community-discover':
+        return <DiscoverProjectsPage />;
+
       case 'projects':
       default:
         return (
@@ -440,7 +531,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
                 <ConnectionStatus showDetails={true} onRetry={handleConnectionRetry} />
               </div>
             )}
-            
+
             {/* Database Setup Recommendation */}
             {connectionStatus.online && connectionStatus.supabaseReachable && !connectionStatus.databaseAvailable && (
               <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -456,9 +547,9 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
                       For full project management features, set up your database. You can still create basic projects without it.
                     </p>
                     {onNavigateToSetup && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="mt-2 border-yellow-300 text-yellow-800 hover:bg-yellow-100"
                         onClick={onNavigateToSetup}
                       >
@@ -481,7 +572,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
+                    <Button
                       onClick={() => setShowProjectForm(true)}
                       disabled={!connectionStatus.online && !getOfflineMode()}
                     >
@@ -520,7 +611,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
                   <FolderOpen className="h-8 w-8 text-primary" />
                 </div>
               </Card>
-              
+
               <Card className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -532,7 +623,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
                   <BarChart3 className="h-8 w-8 text-yellow-500" />
                 </div>
               </Card>
-              
+
               <Card className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -568,13 +659,13 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
                 <FolderOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <h3>No projects found</h3>
                 <p className="text-muted-foreground mb-4">
-                  {searchQuery ? 'Try adjusting your search terms' : 
-                   !connectionStatus.online ? 'Connect to the internet to create and sync projects' :
-                   !connectionStatus.databaseAvailable ? 'Database setup recommended for full project management features' :
-                   'Create your first project to get started'}
+                  {searchQuery ? 'Try adjusting your search terms' :
+                    !connectionStatus.online ? 'Connect to the internet to create and sync projects' :
+                      !connectionStatus.databaseAvailable ? 'Database setup recommended for full project management features' :
+                        'Create your first project to get started'}
                 </p>
                 {!searchQuery && (
-                  <Button 
+                  <Button
                     onClick={() => setShowProjectForm(true)}
                     disabled={!connectionStatus.online && !getOfflineMode()}
                   >
@@ -644,8 +735,8 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
             </Sheet>
             <span className="font-bold">DevTrack Africa</span>
           </div>
-          
-          <NotificationCenter 
+
+          <NotificationCenter
             currentUserId={user.id}
             onNotificationClick={handleNotificationClick}
           />
@@ -657,7 +748,7 @@ export default function Dashboard({ user, profile, onLogout, onNavigateToSetup, 
         {/* Desktop Header */}
         <div className="hidden lg:flex lg:items-center lg:justify-between lg:p-4 lg:border-b">
           <div className="flex-1"></div>
-          <NotificationCenter 
+          <NotificationCenter
             currentUserId={user.id}
             onNotificationClick={handleNotificationClick}
           />

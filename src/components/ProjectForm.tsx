@@ -7,8 +7,9 @@ import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { X, Upload, Github, Globe, Image, Plus, Folder, Calendar, Code, Link, Camera } from 'lucide-react';
+import { X, Upload, Github, Globe, Image, Plus, Folder, Calendar, Code, Link, Camera, Loader2 } from 'lucide-react';
 import { Project, ProjectStatus, ProjectCategory } from '../types/database';
+import { uploadToCloudinary } from '@/utils/uploadImage';
 
 // Convert database Project type to form-compatible type
 type FormProject = {
@@ -29,6 +30,7 @@ type FormProject = {
   githubUrl?: string;
   liveUrl?: string;
   isPublic: boolean;
+  images?: string[];
 };
 
 interface ProjectFormProps {
@@ -85,8 +87,9 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
   const [techInput, setTechInput] = useState('');
   const [showTechSuggestions, setShowTechSuggestions] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const filteredTechOptions = TECH_STACK_OPTIONS.filter(tech => 
+  const filteredTechOptions = TECH_STACK_OPTIONS.filter(tech =>
     tech.toLowerCase().includes(techInput.toLowerCase()) &&
     !formData.techStack.includes(tech)
   );
@@ -109,18 +112,27 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
-    const newImages = files.map(file => {
-      const objectUrl = URL.createObjectURL(file);
-      return objectUrl;
-    });
-    
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...newImages].slice(0, 5)
-    }));
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const uploadPromises = files.map(file => uploadToCloudinary(file));
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls].slice(0, 5)
+      }));
+    } catch (err) {
+      console.error('Failed to upload images:', err);
+      setError('Failed to upload images. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const addSampleImage = () => {
@@ -136,7 +148,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
     };
 
     const sampleImage = categoryImages[formData.category] || categoryImages['web-app'];
-    
+
     setFormData(prev => ({
       ...prev,
       images: [...prev.images, sampleImage].slice(0, 5)
@@ -180,7 +192,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
     };
 
     const result = await onSubmit(submitData as any);
-    
+
     if (!result.success) {
       setError(result.error || 'Failed to save project');
     }
@@ -198,7 +210,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
             {project ? 'Edit Project' : 'Create New Project'}
           </h1>
           <p className="text-lg text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-            {project 
+            {project
               ? 'Update your project details and continue your development journey.'
               : 'Start your development journey by creating a new project. Fill out the details below to get started.'
             }
@@ -213,7 +225,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
               <CardTitle className="text-2xl font-bold text-slate-900">Project Details</CardTitle>
             </div>
           </CardHeader>
-          
+
           <CardContent className="p-8 space-y-10">
             <form onSubmit={handleSubmit} className="space-y-10">
               {error && (
@@ -234,7 +246,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                   </div>
                   <h3 className="text-xl font-bold text-slate-900">Basic Information</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 gap-8">
                   <div className="space-y-3">
                     <Label htmlFor="title" className="text-base font-semibold text-slate-800 flex items-center space-x-2">
@@ -272,7 +284,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                       <Label className="text-base font-semibold text-slate-800">Category</Label>
                       <Select
                         value={formData.category}
-                        onValueChange={(value: string) => 
+                        onValueChange={(value: string) =>
                           setFormData(prev => ({ ...prev, category: value }))
                         }
                       >
@@ -281,8 +293,8 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-slate-200 shadow-xl">
                           {PROJECT_CATEGORIES.map(category => (
-                            <SelectItem 
-                              key={category.value} 
+                            <SelectItem
+                              key={category.value}
                               value={category.value}
                               className="rounded-lg text-base py-3 focus:bg-blue-50 focus:text-blue-900"
                             >
@@ -297,7 +309,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                       <Label className="text-base font-semibold text-slate-800">Status</Label>
                       <Select
                         value={formData.status}
-                        onValueChange={(value: ProjectStatus) => 
+                        onValueChange={(value: ProjectStatus) =>
                           setFormData(prev => ({ ...prev, status: value }))
                         }
                       >
@@ -306,8 +318,8 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-slate-200 shadow-xl">
                           {PROJECT_STATUSES.map(status => (
-                            <SelectItem 
-                              key={status.value} 
+                            <SelectItem
+                              key={status.value}
                               value={status.value}
                               className="rounded-lg text-base py-3 focus:bg-blue-50"
                             >
@@ -350,7 +362,7 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                         }
                       }}
                     />
-                    
+
                     {showTechSuggestions && filteredTechOptions.length > 0 && (
                       <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
                         {filteredTechOptions.slice(0, 8).map(tech => (
@@ -370,8 +382,8 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
                   {formData.techStack.length > 0 && (
                     <div className="flex flex-wrap gap-3">
                       {formData.techStack.map(tech => (
-                        <Badge 
-                          key={tech} 
+                        <Badge
+                          key={tech}
                           className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 rounded-lg font-medium text-sm hover:from-blue-100 hover:to-indigo-100 transition-all duration-200"
                         >
                           <span>{tech}</span>
@@ -558,23 +570,23 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading = f
 
               {/* Action Buttons */}
               <div className="flex justify-between items-center pt-8 border-t border-slate-200">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={onCancel}
                   className="px-8 py-3 h-12 border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all duration-200 font-semibold"
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
+                <Button
+                  type="submit"
+                  disabled={isLoading || isUploading}
                   className="px-8 py-3 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? (
+                  {isLoading || isUploading ? (
                     <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Saving...</span>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>{isUploading ? 'Uploading...' : 'Saving...'}</span>
                     </div>
                   ) : (
                     project ? 'Update Project' : 'Create Project'

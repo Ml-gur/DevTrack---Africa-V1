@@ -32,7 +32,8 @@ import {
   ChevronRight,
   Calendar,
   MessageSquare,
-  FolderSearch
+  FolderSearch,
+  ChevronDown
 } from 'lucide-react';
 import {
   Dashboard,
@@ -53,7 +54,8 @@ const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const ProjectCreationHub = lazy(() => import('./ProjectCreationHub'));
 const EnhancedAnalyticsDashboard = lazy(() => import('./EnhancedAnalyticsDashboard'));
 const ProfileViewer = lazy(() => import('./ProfileViewer'));
-const CommunityPlaceholder = lazy(() => import('./CommunityPlaceholder'));
+const DiscussionsPlaceholder = lazy(() => import('./DiscussionsPlaceholder'));
+const DiscoverProjectsPage = lazy(() => import('./DiscoverProjectsPage'));
 
 export default function StreamlinedDashboard() {
   const { user, profile, signOut } = useAuth();
@@ -73,7 +75,15 @@ export default function StreamlinedDashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [activeNav, setActiveNav] = useState<string>('overview'); // Changed from currentTab
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeCommunitySection, setActiveCommunitySection] = useState<string>('events'); // Community submenu
+  const [communityExpanded, setCommunityExpanded] = useState(false);
+
+  // Auto-expand community menu if active nav is a child
+  useEffect(() => {
+    if (activeNav === 'discussions' || activeNav === 'discover') {
+      setCommunityExpanded(true);
+    }
+  }, [activeNav]);
+
 
   // Load data
   useEffect(() => {
@@ -413,80 +423,7 @@ export default function StreamlinedDashboard() {
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50 to-white overflow-hidden">
       {/* Left Icon Rail */}
-      <aside className="bg-neutral-900 flex flex-col gap-2 items-center p-3 w-16 border-r border-neutral-800">
-        {/* Logo */}
-        <div className="mb-2 size-10 flex items-center justify-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-            <Rocket className="w-5 h-5 text-white" />
-          </div>
-        </div>
 
-        {/* Navigation Icons */}
-        <div className="flex flex-col gap-2 w-full items-center">
-          <button
-            onClick={() => setActiveNav('overview')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'overview' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Overview"
-          >
-            <Dashboard size={18} />
-          </button>
-
-          <button
-            onClick={() => setActiveNav('projects')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'projects' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Projects"
-          >
-            <Folder size={18} />
-          </button>
-
-          <button
-            onClick={() => setActiveNav('analytics')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'analytics' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Analytics"
-          >
-            <Analytics size={18} />
-          </button>
-
-          <button
-            onClick={() => setActiveNav('community')}
-            className={`flex items-center justify-center rounded-lg size-10 transition-all duration-300 ${activeNav === 'community' ? 'bg-neutral-800 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300'
-              }`}
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Community"
-          >
-            <UserMultiple size={18} />
-          </button>
-        </div>
-
-        <div className="flex-1" />
-
-        {/* Bottom Icons */}
-        <div className="flex flex-col gap-2 w-full items-center">
-          <button
-            onClick={() => setShowSettings(true)}
-            className="flex items-center justify-center rounded-lg size-10 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 transition-all duration-300"
-            style={{ transitionTimingFunction: softSpringEasing }}
-            title="Settings"
-          >
-            <SettingsIcon className="w-4 h-4" />
-          </button>
-
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-green-600 rounded-full flex items-center justify-center cursor-pointer"
-            onClick={() => setShowProfile(true)}
-            title={profile?.fullName || user.email || 'Profile'}
-          >
-            <span className="text-white text-xs font-bold">
-              {profile?.fullName ? profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
-            </span>
-          </div>
-        </div>
-      </aside>
 
       {/* Right Detail Sidebar */}
       <aside
@@ -521,7 +458,8 @@ export default function StreamlinedDashboard() {
                 {activeNav === 'overview' && 'Dashboard'}
                 {activeNav === 'projects' && 'Projects'}
                 {activeNav === 'analytics' && 'Analytics'}
-                {activeNav === 'community' && 'Community'}
+                {activeNav === 'discussions' && 'Community Discussions'}
+                {activeNav === 'discover' && 'Discover Projects'}
               </h2>
               <button
                 onClick={() => setSidebarCollapsed(true)}
@@ -579,6 +517,49 @@ export default function StreamlinedDashboard() {
               )}
             </button>
 
+            {/* Community Section */}
+            <div>
+              <button
+                onClick={() => setCommunityExpanded(!communityExpanded)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'discussions' || activeNav === 'discover'
+                  ? 'text-blue-700 font-semibold'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+              >
+                <Users className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'discussions' || activeNav === 'discover' ? 'scale-110' : 'group-hover:scale-105'}`} />
+                <span className="flex-1 text-left text-sm">Community</span>
+                {communityExpanded ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+
+              {/* Community Sub-menu */}
+              {communityExpanded && (
+                <div className="ml-4 pl-4 border-l border-gray-200 space-y-1 mt-1">
+                  <button
+                    onClick={() => setActiveNav('discussions')}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm ${activeNav === 'discussions'
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                  >
+                    <span>Discussions</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveNav('discover')}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm ${activeNav === 'discover'
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                  >
+                    <span>Discover Amazing Projects</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setActiveNav('analytics')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'analytics'
@@ -589,20 +570,6 @@ export default function StreamlinedDashboard() {
               <BarChart3 className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'analytics' ? 'scale-110' : 'group-hover:scale-105'}`} />
               <span className="flex-1 text-left text-sm">Analytics</span>
               {activeNav === 'analytics' && (
-                <div className="w-1.5 h-5 bg-blue-600 rounded-full animate-pulse" />
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveNav('community')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group ${activeNav === 'community'
-                ? 'bg-gradient-to-r from-blue-50 to-green-50 text-blue-700 font-semibold shadow-sm'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-            >
-              <Users className={`w-5 h-5 transition-transform duration-200 ${activeNav === 'community' ? 'scale-110' : 'group-hover:scale-105'}`} />
-              <span className="flex-1 text-left text-sm">Community</span>
-              {activeNav === 'community' && (
                 <div className="w-1.5 h-5 bg-blue-600 rounded-full animate-pulse" />
               )}
             </button>
@@ -745,7 +712,7 @@ export default function StreamlinedDashboard() {
 
                 <Card
                   className="border-purple-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setActiveNav('community')}
+                  onClick={() => setActiveNav('discussions')}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
@@ -947,10 +914,17 @@ export default function StreamlinedDashboard() {
             </Suspense>
           )}
 
-          {/* Community Page */}
-          {activeNav === 'community' && (
+          {/* Community Page - Discussions */}
+          {activeNav === 'discussions' && (
             <Suspense fallback={<DashboardLoader />}>
-              <CommunityPlaceholder />
+              <DiscussionsPlaceholder currentUser={profile} />
+            </Suspense>
+          )}
+
+          {/* Community Page - Discover Projects */}
+          {activeNav === 'discover' && (
+            <Suspense fallback={<DashboardLoader />}>
+              <DiscoverProjectsPage />
             </Suspense>
           )}
         </div>

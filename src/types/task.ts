@@ -11,6 +11,7 @@ export interface Task {
   priority: TaskPriority;
   tags?: string[];
   dueDate?: string;
+  imageUrl?: string;
   estimatedHours?: number;
   actualHours?: number;
   timeSpentMinutes?: number; // Total time spent in minutes

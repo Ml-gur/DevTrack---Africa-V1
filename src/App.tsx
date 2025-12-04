@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { StorageWarningToast } from "./components/StorageWarningToast";
 import { StorageFullDialog } from "./components/StorageFullDialog";
+import { Toaster } from "./components/ui/sonner";
 
 // Import ErrorBoundary directly (don't lazy load error boundaries)
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -135,7 +136,7 @@ const AppContent = React.memo(function AppContentComponent() {
   // Initialize app
   useEffect(() => {
     console.log('🚀 App initialization check...', { authLoading, loading })
-    
+
     // Initialize the app - wait for auth to load
     if (!authLoading) {
       console.log('✅ Auth loaded, completing app initialization')
@@ -156,7 +157,7 @@ const AppContent = React.memo(function AppContentComponent() {
           console.error('❌ Error initializing demo data:', error)
         }
       }
-      
+
       initializeDemoData()
     }
   }, [loading, authLoading, user]);
@@ -238,7 +239,7 @@ const AppContent = React.memo(function AppContentComponent() {
   if (currentPage === "homepage") {
     return (
       <Suspense fallback={<DashboardLoader />}>
-        <Homepage 
+        <Homepage
           onEnterPlatform={onEnterPlatform}
         />
       </Suspense>
@@ -333,7 +334,7 @@ const AppContent = React.memo(function AppContentComponent() {
           </Suspense>
         </ErrorBoundary>
       )}
-      
+
       {/* Kanban Test Page */}
       {currentPage === "kanban-test" && (
         <ErrorBoundary>
@@ -370,7 +371,7 @@ function App() {
       const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
       const isHTTPS = window.location.protocol === 'https:';
       const isFigmaPreview = hostname.includes('figma');
-      
+
       if (isFigmaPreview) {
         console.log('ℹ️ Service Worker disabled in Figma preview environment');
         return;
@@ -386,7 +387,7 @@ function App() {
           scope: '/',
         });
         console.log('✅ Service Worker registered:', registration.scope);
-        
+
         // Check for updates
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
@@ -404,7 +405,7 @@ function App() {
         console.log('ℹ️ Service Worker not available:', error instanceof Error ? error.message : 'Unknown error');
       }
     };
-    
+
     registerSW();
   }, []);
 
@@ -414,8 +415,9 @@ function App() {
         <StorageProvider>
           <Suspense fallback={<DashboardLoader />}>
             <StorageWarningToast />
+            <Toaster />
             <AppContent />
-            
+
             {/* PWA Features */}
             <OfflineIndicator />
           </Suspense>

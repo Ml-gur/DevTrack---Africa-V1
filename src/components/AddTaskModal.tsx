@@ -11,19 +11,22 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { 
-  Bookmark, 
-  Plus, 
-  Star, 
-  Clock, 
+import {
+  Bookmark,
+  Plus,
+  Star,
+  Clock,
   Tag,
   Sparkles,
-  CalendarIcon
+  CalendarIcon,
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 import { Task, TaskPriority, PRIORITY_COLORS, PRIORITY_ICONS } from '../types/task';
 import { TaskTemplate, TEMPLATE_CATEGORIES } from '../types/template';
 import { useTaskTemplates } from './hooks/useTaskTemplates';
 import { format } from 'date-fns';
+import { uploadToCloudinary } from '@/utils/uploadImage';
 
 interface AddTaskModalProps {
   projectId: string;
@@ -43,6 +46,8 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
   const [selectedTemplate, setSelectedTemplate] = useState<TaskTemplate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const popularTemplates = getPopularTemplates(3);
 
@@ -92,14 +97,28 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
+    setIsUploading(true);
 
     try {
+      let imageUrl = undefined;
+      if (imageFile) {
+        try {
+          imageUrl = await uploadToCloudinary(imageFile);
+        } catch (error) {
+          console.error('Image upload failed:', error);
+          setErrors({ submit: 'Failed to upload image. Please try again.' });
+          setIsSubmitting(false);
+          setIsUploading(false);
+          return;
+        }
+      }
+
       const newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
         projectId,
         title: formData.title.trim(),
@@ -109,7 +128,8 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
         estimatedHours: formData.estimatedHours ? Number(formData.estimatedHours) : undefined,
         dueDate: formData.dueDate ? formData.dueDate.toISOString() : undefined,
         timeSpentMinutes: 0,
-        position: 0
+        position: 0,
+        imageUrl
       };
 
       await onSubmit(newTask);
@@ -119,12 +139,13 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
       setErrors({ submit: 'Failed to create task. Please try again.' });
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => {
@@ -240,7 +261,7 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
                   <Label htmlFor="priority">Priority</Label>
                   <Select
                     value={formData.priority}
-                    onValueChange={(value: TaskPriority) => 
+                    onValueChange={(value: TaskPriority) =>
                       handleInputChange('priority', value)
                     }
                   >
@@ -316,12 +337,39 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
                 </Popover>
               </div>
 
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label>Task Image (Optional)</Label>
+                <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setImageFile(file);
+                    }}
+                  />
+                  {imageFile ? (
+                    <div className="flex items-center justify-center gap-2 text-primary">
+                      <ImageIcon className="w-5 h-5" />
+                      <span className="text-sm font-medium">{imageFile.name}</span>
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground">
+                      <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Click to upload an image</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Task Preview */}
               <div className="p-3 bg-muted rounded-lg">
                 <p className="text-sm mb-2">Task Preview:</p>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className={`${PRIORITY_COLORS[formData.priority]} text-xs`}
                   >
                     {PRIORITY_ICONS[formData.priority]} {formData.priority}
@@ -369,7 +417,14 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
                   type="submit"
                   disabled={isSubmitting || !formData.title.trim()}
                 >
-                  {isSubmitting ? 'Creating...' : 'Create Task'}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {isUploading ? 'Uploading Image...' : 'Creating Task...'}
+                    </>
+                  ) : (
+                    'Create Task'
+                  )}
                 </Button>
               </DialogFooter>
             </form>
@@ -385,7 +440,7 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
                 </div>
                 <div className="grid grid-cols-1 gap-2">
                   {popularTemplates.map(template => (
-                    <Card 
+                    <Card
                       key={template.id}
                       className="cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => applyTemplate(template)}
@@ -434,7 +489,7 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
                       </div>
                       <div className="grid grid-cols-1 gap-2 ml-8">
                         {categoryTemplates.map(template => (
-                          <Card 
+                          <Card
                             key={template.id}
                             className="cursor-pointer hover:bg-muted/50 transition-colors"
                             onClick={() => applyTemplate(template)}
@@ -463,8 +518,8 @@ export default function AddTaskModal({ projectId, onSubmit, onClose }: AddTaskMo
                                     </p>
                                   )}
                                 </div>
-                                <Badge 
-                                  variant="outline" 
+                                <Badge
+                                  variant="outline"
                                   className={`${PRIORITY_COLORS[template.priority]} text-xs`}
                                 >
                                   {PRIORITY_ICONS[template.priority]}
