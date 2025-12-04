@@ -105,7 +105,7 @@ export default function EnhancedMinimalProjectManager({
       newStatus = 'planning';
     } else {
       const completedTasks = tasks.filter(t => t.status === 'completed').length;
-      
+
       if (completedTasks === tasks.length) {
         // All tasks completed = Complete
         newStatus = 'completed';
@@ -204,21 +204,21 @@ export default function EnhancedMinimalProjectManager({
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
-                className="gap-2"
+                className="gap-2 font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              
+
               <div className="h-8 w-px bg-gray-200 hidden sm:block" />
-              
+
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
                   {project.title?.charAt(0).toUpperCase() || 'P'}
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">{project.title}</h1>
-                  <p className="text-xs text-gray-500 hidden sm:block">{project.description || 'No description'}</p>
+                  <h1 className="text-xl font-bold text-gray-900 tracking-tight">{project.title}</h1>
+                  <p className="text-xs font-medium text-gray-500 hidden sm:block">{project.description || 'No description'}</p>
                 </div>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function EnhancedMinimalProjectManager({
               >
                 <Star className={`w-4 h-4 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -254,44 +254,44 @@ export default function EnhancedMinimalProjectManager({
           </div>
 
           {/* Quick Stats Bar */}
-          <div className="flex items-center gap-6 pb-3 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+          <div className="flex items-center gap-8 pb-3 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shadow-sm">
                 <CheckSquare className="w-4 h-4 text-blue-600" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">Progress</div>
-                <div className="font-semibold text-gray-900">{progressPercentage}%</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Progress</div>
+                <div className="font-bold text-gray-900">{progressPercentage}%</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center shadow-sm">
                 <Target className="w-4 h-4 text-green-600" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">Completed</div>
-                <div className="font-semibold text-gray-900">{completedTasks}/{totalTasks}</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Completed</div>
+                <div className="font-bold text-gray-900">{completedTasks}/{totalTasks}</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center shadow-sm">
                 <Clock className="w-4 h-4 text-purple-600" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">Active</div>
-                <div className="font-semibold text-gray-900">{inProgressTasks}</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Active</div>
+                <div className="font-bold text-gray-900">{inProgressTasks}</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center shadow-sm">
                 <TrendingUp className="w-4 h-4 text-orange-600" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">Status</div>
-                <Badge className={statusDisplay.color}>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</div>
+                <Badge className={`${statusDisplay.color} font-semibold`}>
                   {statusDisplay.label}
                 </Badge>
               </div>
@@ -380,7 +380,7 @@ export default function EnhancedMinimalProjectManager({
               Update your project details
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div>
               <Label htmlFor="title">Project Title</Label>

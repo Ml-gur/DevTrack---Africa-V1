@@ -10,12 +10,12 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { ScrollArea } from './ui/scroll-area';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from './ui/select';
 import { Project as LocalProject, Task as LocalTask } from '../utils/supabase-database';
 import {
@@ -47,19 +47,19 @@ import {
   Minus,
   Plus
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   Area,
   AreaChart,
@@ -69,11 +69,11 @@ import {
   PolarRadiusAxis,
   Radar
 } from 'recharts';
-import { 
-  format, 
-  differenceInDays, 
-  startOfWeek, 
-  endOfWeek, 
+import {
+  format,
+  differenceInDays,
+  startOfWeek,
+  endOfWeek,
   startOfMonth,
   endOfMonth,
   isWithinInterval,
@@ -112,28 +112,28 @@ interface AnalyticsMetrics {
   todoTasks: number;
   overdueTasks: number;
   completionRate: number;
-  
+
   // Time Metrics
   totalTimeSpent: number;
   avgTimePerTask: number;
   avgTimePerProject: number;
-  
+
   // Project Metrics
   totalProjects: number;
   activeProjects: number;
   completedProjects: number;
   projectCompletionRate: number;
-  
+
   // Productivity Metrics
   productivityScore: number;
   streakDays: number;
   tasksPerDay: number;
-  
+
   // Trends
   tasksTrend: MetricTrend;
   timeTrend: MetricTrend;
   productivityTrend: MetricTrend;
-  
+
   // Peak Performance
   mostProductiveDay: string;
   mostProductiveHour: number;
@@ -235,13 +235,13 @@ export default function EnhancedAnalyticsDashboard({
   const metrics: AnalyticsMetrics = useMemo(() => {
     const { tasks: filteredTasks, projects: filteredProjects } = filteredData;
     const now = new Date();
-    
+
     // Task metrics
     const totalTasks = filteredTasks.length;
     const completedTasks = filteredTasks.filter(t => t.status === 'completed').length;
     const inProgressTasks = filteredTasks.filter(t => t.status === 'in_progress').length;
     const todoTasks = filteredTasks.filter(t => t.status === 'todo').length;
-    
+
     // Overdue tasks
     const overdueTasks = filteredTasks.filter(t => {
       if (t.status === 'completed' || !t.dueDate) return false;
@@ -252,44 +252,36 @@ export default function EnhancedAnalyticsDashboard({
         return false;
       }
     }).length;
-    
+
     const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-    
+
     // Time metrics
+    const completedTasksArray = filteredTasks.filter(t => t.status === 'completed');
+    const timeSpentOnCompleted = completedTasksArray.reduce((sum, task) => sum + (task.timeSpentMinutes || 0), 0);
     const totalTimeSpent = filteredTasks.reduce((sum, task) => sum + (task.timeSpentMinutes || 0), 0);
-    const avgTimePerTask = completedTasks > 0 ? totalTimeSpent / completedTasks : 0;
-    
+    const avgTimePerTask = completedTasks > 0 ? timeSpentOnCompleted / completedTasks : 0;
+
     // Project metrics
     const totalProjects = filteredProjects.length;
-    const activeProjects = filteredProjects.filter(p => 
+    const activeProjects = filteredProjects.filter(p =>
       p.status === 'active' || p.status === 'in_progress'
     ).length;
     const completedProjectsArray = filteredProjects.filter(p => p.status === 'completed');
     const completedProjects = completedProjectsArray.length;
     const projectCompletionRate = totalProjects > 0 ? (completedProjects / totalProjects) * 100 : 0;
-    
-    const avgTimePerProject = completedProjectsArray.length > 0 
+
+    const avgTimePerProject = completedProjectsArray.length > 0
       ? completedProjectsArray.reduce((sum, project) => {
-          const projectTasks = tasks.filter(t => t.projectId === project.id);
-          const projectTime = projectTasks.reduce((s, t) => s + (t.timeSpentMinutes || 0), 0);
-          return sum + projectTime;
-        }, 0) / completedProjectsArray.length
+        const projectTasks = tasks.filter(t => t.projectId === project.id);
+        const projectTime = projectTasks.reduce((s, t) => s + (t.timeSpentMinutes || 0), 0);
+        return sum + projectTime;
+      }, 0) / completedProjectsArray.length
       : 0;
-    
-    // Productivity metrics
-    const daysInRange = differenceInDays(dateRange.end, dateRange.start) || 1;
-    const tasksPerDay = completedTasks / daysInRange;
-    
-    // Productivity score (0-100)
-    const targetTasksPerDay = 3;
-    const taskCompletionScore = Math.min(50, (tasksPerDay / targetTasksPerDay) * 50);
-    const completionRateScore = completionRate * 0.5;
-    const productivityScore = Math.round(taskCompletionScore + completionRateScore);
-    
+
     // Calculate streak (consecutive days with completed tasks)
     let streakDays = 0;
     let currentDate = new Date(now);
-    
+
     for (let i = 0; i < 365; i++) {
       const hasTasksOnDay = filteredTasks.some(t => {
         if (t.status !== 'completed') return false;
@@ -300,7 +292,7 @@ export default function EnhancedAnalyticsDashboard({
           return false;
         }
       });
-      
+
       if (hasTasksOnDay) {
         streakDays++;
         currentDate = subDays(currentDate, 1);
@@ -308,25 +300,58 @@ export default function EnhancedAnalyticsDashboard({
         break;
       }
     }
-    
+
+    // Productivity metrics
+    const daysInRange = differenceInDays(dateRange.end, dateRange.start) || 1;
+    const tasksPerDay = completedTasks / daysInRange;
+
+    // Productivity score (0-100)
+    // Methodology:
+    // 40% based on task completion vs target (3/day)
+    // 30% based on completion rate (completed / total)
+    // 30% based on consistency (streak)
+    const targetTasksPerDay = 3;
+    const taskCompletionScore = Math.min(40, (tasksPerDay / targetTasksPerDay) * 40);
+    const completionRateScore = completionRate * 0.3;
+    const streakScore = Math.min(30, (streakDays / 7) * 30); // Cap at 7 days for max score
+    const productivityScore = Math.round(taskCompletionScore + completionRateScore + streakScore);
+
     // Find most productive day of week
     const dayTaskCount: Record<string, number> = {};
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    
+
     filteredTasks.forEach(task => {
       if (task.status === 'completed') {
         try {
           const date = task.completedAt ? parseISO(task.completedAt) : parseISO(task.updated_at);
           const dayName = dayNames[date.getDay()];
           dayTaskCount[dayName] = (dayTaskCount[dayName] || 0) + 1;
-        } catch {}
+        } catch { }
       }
     });
-    
-    const mostProductiveDay = Object.entries(dayTaskCount).reduce((max, [day, count]) => 
+
+    const mostProductiveDay = Object.entries(dayTaskCount).reduce((max, [day, count]) =>
       count > (dayTaskCount[max] || 0) ? day : max, 'Monday'
     );
-    
+
+    // Find most productive hour
+    const hourTaskCount: Record<number, number> = {};
+    filteredTasks.forEach(task => {
+      if (task.status === 'completed') {
+        try {
+          const date = task.completedAt ? parseISO(task.completedAt) : parseISO(task.updated_at);
+          const hour = date.getHours();
+          hourTaskCount[hour] = (hourTaskCount[hour] || 0) + 1;
+        } catch { }
+      }
+    });
+
+    const mostProductiveHour = Object.keys(hourTaskCount).length > 0
+      ? Number(Object.entries(hourTaskCount).reduce((max, [hour, count]) =>
+        count > (hourTaskCount[Number(max)] || 0) ? hour : max, Object.keys(hourTaskCount)[0]
+      ))
+      : 14; // Default to 2 PM if no data
+
     // Calculate trends (compare with previous period)
     const previousPeriodStart = subDays(dateRange.start, daysInRange);
     const previousTasks = tasks.filter(t => {
@@ -337,24 +362,24 @@ export default function EnhancedAnalyticsDashboard({
         return false;
       }
     });
-    
+
     const previousCompleted = previousTasks.filter(t => t.status === 'completed').length;
-    const tasksTrend: MetricTrend = 
-      completedTasks > previousCompleted ? 'up' : 
-      completedTasks < previousCompleted ? 'down' : 'neutral';
-    
+    const tasksTrend: MetricTrend =
+      completedTasks > previousCompleted ? 'up' :
+        completedTasks < previousCompleted ? 'down' : 'neutral';
+
     const previousTime = previousTasks.reduce((sum, t) => sum + (t.timeSpentMinutes || 0), 0);
-    const timeTrend: MetricTrend = 
-      totalTimeSpent > previousTime ? 'up' : 
-      totalTimeSpent < previousTime ? 'down' : 'neutral';
-    
-    const previousProductivity = previousCompleted > 0 
+    const timeTrend: MetricTrend =
+      totalTimeSpent > previousTime ? 'up' :
+        totalTimeSpent < previousTime ? 'down' : 'neutral';
+
+    const previousProductivity = previousCompleted > 0
       ? ((previousCompleted / previousTasks.length) * 50 + (previousCompleted / daysInRange / targetTasksPerDay) * 50)
       : 0;
-    const productivityTrend: MetricTrend = 
-      productivityScore > previousProductivity ? 'up' : 
-      productivityScore < previousProductivity ? 'down' : 'neutral';
-    
+    const productivityTrend: MetricTrend =
+      productivityScore > previousProductivity ? 'up' :
+        productivityScore < previousProductivity ? 'down' : 'neutral';
+
     return {
       totalTasks,
       completedTasks,
@@ -376,7 +401,7 @@ export default function EnhancedAnalyticsDashboard({
       timeTrend,
       productivityTrend,
       mostProductiveDay,
-      mostProductiveHour: 14, // Default to 2 PM
+      mostProductiveHour,
       peakProductivityWeek: format(now, 'MMM d, yyyy')
     };
   }, [filteredData, tasks, dateRange]);
@@ -384,108 +409,106 @@ export default function EnhancedAnalyticsDashboard({
   // Generate AI insights
   const insights: ProductivityInsight[] = useMemo(() => {
     const generated: ProductivityInsight[] = [];
-    
+
     // Achievements
-    if (metrics.streakDays >= 7) {
+    if (metrics.streakDays >= 3) {
       generated.push({
         id: 'streak-achievement',
         type: 'achievement',
-        title: '🔥 Amazing Streak!',
-        description: `You've maintained a ${metrics.streakDays}-day productivity streak. Keep the momentum going!`,
+        title: '🔥 Heating Up!',
+        description: `You've maintained a ${metrics.streakDays}-day productivity streak. Keep it going!`,
         icon: <Flame className="w-5 h-5 text-orange-600" />,
         priority: 'high'
       });
+    } else if (metrics.streakDays === 0 && metrics.completedTasks > 0) {
+      generated.push({
+        id: 'start-streak',
+        type: 'suggestion',
+        title: '⚡ Start a Streak',
+        description: `Complete a task today to start a new streak! Consistency is key.`,
+        icon: <Zap className="w-5 h-5 text-yellow-600" />,
+        priority: 'medium',
+        actionable: true,
+        actionText: 'View Tasks'
+      });
     }
-    
-    if (metrics.completedTasks >= 50) {
+
+    if (metrics.completedTasks >= 10) {
       generated.push({
         id: 'task-master',
         type: 'milestone',
-        title: '🏆 Task Master',
-        description: `You've completed ${metrics.completedTasks} tasks! You're crushing your goals.`,
+        title: '🏆 Getting Things Done',
+        description: `You've completed ${metrics.completedTasks} tasks in this period. Great momentum!`,
         icon: <Trophy className="w-5 h-5 text-yellow-600" />,
         priority: 'high'
       });
     }
-    
-    if (metrics.productivityScore >= 85) {
+
+    if (metrics.productivityScore >= 80) {
       generated.push({
         id: 'high-productivity',
         type: 'achievement',
         title: '⭐ Peak Performance',
-        description: `Your productivity score is ${Math.round(metrics.productivityScore)}%. Excellent work!`,
+        description: `Your productivity score is ${Math.round(metrics.productivityScore)}%. You're in the top tier!`,
         icon: <Star className="w-5 h-5 text-yellow-500" />,
         priority: 'high'
       });
     }
-    
+
     // Warnings
-    if (metrics.overdueTasks > 5) {
+    if (metrics.overdueTasks > 0) {
       generated.push({
         id: 'overdue-warning',
         type: 'warning',
-        title: '⚠️ Overdue Tasks',
-        description: `You have ${metrics.overdueTasks} overdue tasks. Consider reorganizing priorities.`,
+        title: '⚠️ Attention Needed',
+        description: `You have ${metrics.overdueTasks} overdue task${metrics.overdueTasks > 1 ? 's' : ''}. Reschedule or complete them.`,
         icon: <AlertCircle className="w-5 h-5 text-red-600" />,
         priority: 'high',
         actionable: true,
         actionText: 'Review Tasks'
       });
     }
-    
-    if (metrics.inProgressTasks > metrics.completedTasks * 2) {
+
+    if (metrics.inProgressTasks > 5) {
       generated.push({
         id: 'too-many-wip',
         type: 'warning',
-        title: '📊 Too Many WIP',
-        description: `You have ${metrics.inProgressTasks} tasks in progress. Focus on completing before starting new ones.`,
+        title: '📊 Focus Check',
+        description: `You have ${metrics.inProgressTasks} tasks in progress. Try finishing one before starting another.`,
         icon: <Activity className="w-5 h-5 text-orange-600" />,
         priority: 'medium',
         actionable: true,
         actionText: 'Prioritize'
       });
     }
-    
+
     // Suggestions
-    if (metrics.avgTimePerTask > 180) {
+    if (metrics.avgTimePerTask > 120) {
       generated.push({
         id: 'break-down-tasks',
         type: 'suggestion',
-        title: '💡 Break Down Tasks',
-        description: `Average task time is ${formatTime(metrics.avgTimePerTask)}. Consider splitting large tasks into smaller ones.`,
+        title: '💡 Work Smarter',
+        description: `Tasks are taking ~${formatTime(metrics.avgTimePerTask)}. Try breaking them into subtasks.`,
         icon: <Lightbulb className="w-5 h-5 text-blue-600" />,
         priority: 'medium',
         actionable: true,
         actionText: 'Learn More'
       });
     }
-    
-    if (metrics.mostProductiveDay && metrics.completedTasks > 10) {
+
+    if (metrics.mostProductiveDay) {
       generated.push({
         id: 'productive-day',
         type: 'suggestion',
-        title: '📅 Peak Day Pattern',
-        description: `${metrics.mostProductiveDay} is your most productive day. Schedule important tasks then!`,
+        title: '📅 Your Power Day',
+        description: `You complete the most tasks on ${metrics.mostProductiveDay}s. Plan your biggest goals then!`,
         icon: <Calendar className="w-5 h-5 text-purple-600" />,
         priority: 'low',
         actionable: true,
         actionText: 'Set Schedule'
       });
     }
-    
-    if (metrics.completionRate < 30 && metrics.totalTasks > 10) {
-      generated.push({
-        id: 'low-completion',
-        type: 'suggestion',
-        title: '🎯 Improve Focus',
-        description: `Task completion rate is ${Math.round(metrics.completionRate)}%. Try the Eisenhower Matrix for better prioritization.`,
-        icon: <Target className="w-5 h-5 text-indigo-600" />,
-        priority: 'medium',
-        actionable: true,
-        actionText: 'Get Tips'
-      });
-    }
-    
+
     return generated.slice(0, 6);
   }, [metrics]);
 
@@ -493,14 +516,14 @@ export default function EnhancedAnalyticsDashboard({
   const dailyData = useMemo(() => {
     const days: Record<string, { tasks: number; time: number; completed: number }> = {};
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     // Initialize last 7 days
     for (let i = 6; i >= 0; i--) {
       const date = subDays(new Date(), i);
       const key = format(date, 'yyyy-MM-dd');
       days[key] = { tasks: 0, time: 0, completed: 0 };
     }
-    
+
     // Populate with task data
     filteredData.tasks.forEach(task => {
       try {
@@ -511,9 +534,9 @@ export default function EnhancedAnalyticsDashboard({
           days[key].time += task.timeSpentMinutes || 0;
           if (task.status === 'completed') days[key].completed++;
         }
-      } catch {}
+      } catch { }
     });
-    
+
     return Object.entries(days).map(([date, data]) => ({
       day: dayNames[new Date(date).getDay()],
       date,
@@ -534,7 +557,7 @@ export default function EnhancedAnalyticsDashboard({
     const high = filteredData.tasks.filter(t => t.priority === 'high');
     const medium = filteredData.tasks.filter(t => t.priority === 'medium');
     const low = filteredData.tasks.filter(t => t.priority === 'low');
-    
+
     return [
       { name: 'High', tasks: high.length, time: high.reduce((s, t) => s + (t.timeSpentMinutes || 0), 0), color: COLORS.danger },
       { name: 'Medium', tasks: medium.length, time: medium.reduce((s, t) => s + (t.timeSpentMinutes || 0), 0), color: COLORS.warning },
@@ -548,7 +571,7 @@ export default function EnhancedAnalyticsDashboard({
       const completed = projectTasks.filter(t => t.status === 'completed').length;
       const total = projectTasks.length;
       const timeSpent = projectTasks.reduce((sum, t) => sum + (t.timeSpentMinutes || 0), 0);
-      
+
       return {
         name: project.title.substring(0, 20),
         completion: total > 0 ? (completed / total) * 100 : 0,
@@ -591,20 +614,20 @@ export default function EnhancedAnalyticsDashboard({
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
+          <h1 className="text-4xl font-extrabold flex items-center gap-3 tracking-tight text-gray-900">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <Brain className="w-7 h-7 text-white" />
             </div>
             Analytics Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-gray-600 text-lg font-medium mt-2 leading-relaxed">
             AI-powered insights and performance metrics
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Select value={timeFilter} onValueChange={(value: TimeFilter) => setTimeFilter(value)}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] font-medium">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -630,7 +653,15 @@ export default function EnhancedAnalyticsDashboard({
                   <Rocket className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Productivity</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm font-medium text-gray-600">Productivity</p>
+                    <div className="group relative">
+                      <AlertCircle className="w-3 h-3 text-gray-400 cursor-help" />
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg z-50">
+                        Based on tasks/day, completion rate, and streak consistency.
+                      </div>
+                    </div>
+                  </div>
                   <p className={`text-2xl font-bold ${getProductivityColor(metrics.productivityScore)}`}>
                     {Math.round(metrics.productivityScore)}%
                   </p>
@@ -643,9 +674,9 @@ export default function EnhancedAnalyticsDashboard({
             </div>
             <Progress value={metrics.productivityScore} className="h-2" />
             <p className="text-xs text-gray-600 mt-2">
-              {metrics.productivityScore >= 80 ? 'Excellent performance!' : 
-               metrics.productivityScore >= 60 ? 'Good progress' : 
-               'Room for improvement'}
+              {metrics.productivityScore >= 80 ? 'Excellent performance!' :
+                metrics.productivityScore >= 60 ? 'Good progress' :
+                  'Room for improvement'}
             </p>
           </CardContent>
         </Card>
@@ -761,7 +792,15 @@ export default function EnhancedAnalyticsDashboard({
                 <Calendar className="w-7 h-7 text-blue-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">Peak Day</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-sm text-gray-600 mb-1">Peak Day</p>
+                  <div className="group relative">
+                    <AlertCircle className="w-3 h-3 text-gray-400 cursor-help" />
+                    <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg z-50">
+                      The day of the week you complete the most tasks.
+                    </div>
+                  </div>
+                </div>
                 <p className="text-2xl font-bold text-blue-600">{metrics.mostProductiveDay}</p>
                 <p className="text-xs text-gray-500">most productive</p>
               </div>
@@ -793,7 +832,7 @@ export default function EnhancedAnalyticsDashboard({
               <Brain className="w-5 h-5 text-primary" />
               AI-Powered Insights
               <Badge variant="secondary" className="ml-2">
-                {insights.length} insights
+                {insights.length} {insights.length === 1 ? 'insight' : 'insights'}
               </Badge>
             </CardTitle>
             <CardDescription>
@@ -803,21 +842,19 @@ export default function EnhancedAnalyticsDashboard({
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {insights.map(insight => (
-                <div 
+                <div
                   key={insight.id}
-                  className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all hover:shadow-md ${
-                    insight.type === 'achievement' ? 'bg-green-50 border-green-200 hover:border-green-300' :
+                  className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all hover:shadow-md ${insight.type === 'achievement' ? 'bg-green-50 border-green-200 hover:border-green-300' :
                     insight.type === 'warning' ? 'bg-red-50 border-red-200 hover:border-red-300' :
-                    insight.type === 'suggestion' ? 'bg-blue-50 border-blue-200 hover:border-blue-300' :
-                    'bg-purple-50 border-purple-200 hover:border-purple-300'
-                  }`}
+                      insight.type === 'suggestion' ? 'bg-blue-50 border-blue-200 hover:border-blue-300' :
+                        'bg-purple-50 border-purple-200 hover:border-purple-300'
+                    }`}
                 >
-                  <div className={`p-2.5 rounded-lg ${
-                    insight.type === 'achievement' ? 'bg-green-100' :
+                  <div className={`p-2.5 rounded-lg ${insight.type === 'achievement' ? 'bg-green-100' :
                     insight.type === 'warning' ? 'bg-red-100' :
-                    insight.type === 'suggestion' ? 'bg-blue-100' :
-                    'bg-purple-100'
-                  }`}>
+                      insight.type === 'suggestion' ? 'bg-blue-100' :
+                        'bg-purple-100'
+                    }`}>
                     {insight.icon}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -876,16 +913,16 @@ export default function EnhancedAnalyticsDashboard({
                   <AreaChart data={dailyData}>
                     <defs>
                       <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
+                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="day" stroke="#6b7280" />
                     <YAxis stroke="#6b7280" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'white', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
                         border: '1px solid #e5e7eb',
                         borderRadius: '8px',
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
@@ -895,10 +932,10 @@ export default function EnhancedAnalyticsDashboard({
                         name === 'completed' ? 'Completed' : name === 'tasks' ? 'Total Tasks' : 'Time'
                       ]}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="completed" 
-                      stroke={COLORS.success} 
+                    <Area
+                      type="monotone"
+                      dataKey="completed"
+                      stroke={COLORS.success}
                       fill="url(#colorTasks)"
                       strokeWidth={2}
                     />
@@ -962,9 +999,9 @@ export default function EnhancedAnalyticsDashboard({
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="day" stroke="#6b7280" />
                   <YAxis stroke="#6b7280" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px'
                     }}
@@ -974,18 +1011,18 @@ export default function EnhancedAnalyticsDashboard({
                     ]}
                   />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="completed" 
-                    stroke={COLORS.success} 
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    stroke={COLORS.success}
                     strokeWidth={3}
                     dot={{ r: 5 }}
                     name="Completed Tasks"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="tasks" 
-                    stroke={COLORS.primary} 
+                  <Line
+                    type="monotone"
+                    dataKey="tasks"
+                    stroke={COLORS.primary}
                     strokeWidth={3}
                     dot={{ r: 5 }}
                     name="Total Tasks"
@@ -1015,7 +1052,7 @@ export default function EnhancedAnalyticsDashboard({
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis dataKey="name" stroke="#6b7280" />
                       <YAxis stroke="#6b7280" />
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value: any, name) => [
                           name === 'time' ? formatTime(Number(value)) : value,
                           name === 'tasks' ? 'Tasks' : 'Time'
@@ -1043,8 +1080,8 @@ export default function EnhancedAnalyticsDashboard({
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
+                        <div
+                          className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: item.color }}
                         />
                         <span className="font-semibold">{item.name} Priority</span>
@@ -1078,10 +1115,10 @@ export default function EnhancedAnalyticsDashboard({
             <>
               <Card>
                 <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChartIcon className="w-5 h-5" />
-                  Project Completion Rates
-                </CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChartIcon className="w-5 h-5" />
+                    Project Completion Rates
+                  </CardTitle>
                   <CardDescription>Performance across all active projects</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1090,7 +1127,7 @@ export default function EnhancedAnalyticsDashboard({
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis type="number" domain={[0, 100]} stroke="#6b7280" />
                       <YAxis type="category" dataKey="name" stroke="#6b7280" width={150} />
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value: any, name) => [
                           `${Number(value).toFixed(1)}%`,
                           'Completion'
@@ -1158,9 +1195,9 @@ export default function EnhancedAnalyticsDashboard({
               <div className="flex-1">
                 <h3 className="font-bold text-lg mb-2 text-gray-900">Performance Summary</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  During this period, you've completed <strong>{metrics.completedTasks}</strong> tasks 
-                  out of <strong>{metrics.totalTasks}</strong> total, achieving a <strong>{Math.round(metrics.completionRate)}%</strong> completion rate. 
-                  You've invested <strong>{formatTime(metrics.totalTimeSpent)}</strong> of focused work 
+                  During this period, you've completed <strong>{metrics.completedTasks}</strong> tasks
+                  out of <strong>{metrics.totalTasks}</strong> total, achieving a <strong>{Math.round(metrics.completionRate)}%</strong> completion rate.
+                  You've invested <strong>{formatTime(metrics.totalTimeSpent)}</strong> of focused work
                   with an average of <strong>{formatTime(metrics.avgTimePerTask)}</strong> per task.
                   {metrics.streakDays > 0 && (
                     <> You're on a <strong className="text-orange-600">{metrics.streakDays}-day streak</strong> 🔥</>
@@ -1177,6 +1214,29 @@ export default function EnhancedAnalyticsDashboard({
           </CardContent>
         </Card>
       )}
+
+      {/* Goal Setting Placeholder */}
+      <Card className="border-dashed border-2 border-gray-200 bg-gray-50/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-500">
+            <Target className="w-5 h-5" />
+            Goal Setting
+          </CardTitle>
+          <CardDescription>
+            Set and track your productivity goals (Coming Soon)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <Target className="w-12 h-12 text-gray-300 mb-4" />
+          <p className="text-gray-500 max-w-md mb-4 text-sm">
+            Define daily task targets, time limits, and project milestones to stay on track.
+            This feature will help you visualize your progress towards specific objectives.
+          </p>
+          <Button variant="outline" disabled className="bg-white">
+            Configure Goals
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
